@@ -4,7 +4,7 @@ services:
   mysql:
     image: mysql:5.7
     container_name: flask_mysql
-    restart: always
+    command: --disable-partition-engine-check
     environment:
       MYSQL_DATABASE: 'db'
       # So you don't have to use root, but you can if you like
