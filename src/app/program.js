@@ -1,6 +1,8 @@
 "use strict";
 const express = require('express');
 const uuidv4 = require('uuid/v4');
+const crypto = require('crypto');
+const hash = crypto.createHash('sha256');
 const app = express();
 const port = 3000;
 try{
@@ -29,7 +31,8 @@ connection.connect(function(err){
 });
 app.post('/user/new/:username/:password', (req, res) => {
 try{
-  connection.query('INSERT INTO user(id, username, password) VALUES ("'+uuidv4()+ '","'+ req.params.username +'","' + req.params.password + '");');
+  hash.update(req.params.password);
+  connection.query('INSERT INTO user(id, username, password) VALUES ("'+uuidv4()+ '","'+ req.params.username +'","' + hash.digest('hex') + '");');
 }
 catch(err){
   res.send(err);
