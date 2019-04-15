@@ -1,5 +1,6 @@
 "use strict";
 const express = require('express');
+const uuidv4 = require('uuid/v4');
 const app = express();
 const port = 3000;
 try{
@@ -13,7 +14,7 @@ var connection = mysql.createConnection({
   user: "root",
   port: 3306,
   password: "password",
-  database: "lab"
+  database: "db"
 });
 
 connection.connect(function(err){
@@ -21,11 +22,19 @@ connection.connect(function(err){
     console.log("Error connecting database \n\n" + err);
     throw err
   } 
-  connection.query('select * from User', function(err, rows, fields){
+  connection.query('select * from user', function(err, rows, fields){
     if(err) throw err;
     console.log(rows);
-    connection.end();
     });
+});
+app.post('/user/new/:username/:password', (req, res) => {
+try{
+  connection.query('INSERT INTO user(id, username, password) VALUES ("'+uuidv4()+ '","'+ req.params.username +'","' + req.params.password + '");');
+}
+catch(err){
+  res.send(err);
+}
+  res.send('success');
 });
 
 app.get('/', (req, res) => {
