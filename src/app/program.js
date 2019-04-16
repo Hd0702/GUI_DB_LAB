@@ -3,7 +3,10 @@ const express = require('express');
 const uuidv4 = require('uuid/v4');
 const crypto = require('crypto');
 const hash = crypto.createHash('sha256');
+var moment = require('moment');
 const app = express();
+app.use(express.json())
+
 const port = 3000;
 try{
   var mysql = require('mysql');
@@ -24,18 +27,21 @@ connection.connect(function(err){
     console.log("Error connecting database \n\n" + err);
     throw err
   } 
-  connection.query('select * from user', function(err, rows, fields){
+  connection.query('select * from Users', function(err, rows, fields){
     if(err) throw err;
     console.log(rows);
     });
 });
-app.post('/user/new/:username/:password', (req, res) => {
+app.post('/user/new/', (req, res) => {
 try{
-  hash.update(req.params.password);
-  connection.query('INSERT INTO user(id, username, password) VALUES ("'+uuidv4()+ '","'+ req.params.username +'","' + hash.digest('hex') + '");');
+  var test = res.getHeader('username');
+  //res.send(req.body);
+  hash.update(res.getHeader("password"));
+  var time = moment().format('yyyy-mm-dd:hh:mm:ss');
+  connection.query('INSERT INTO User(UserId, Username, Password, DateCreated, DisplayName) VALUES ("'+uuidv4()+ '","'+ "sdsdsd" +'","' +"ssdsd" + '","' + "2019-01-01:01:01:01" + '","'+ "sdsdsd" + '");');
 }
 catch(err){
-  res.send(err);
+  console.log(err);
 }
   res.send('success');
 });

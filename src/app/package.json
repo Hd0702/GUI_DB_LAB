@@ -18,8 +18,10 @@
   },
   "homepage": "https://github.com/Hd0702/GUI_DB_LAB#readme",
   "dependencies": {
+    "body-parser": "^1.18.3",
     "crypto": "^1.0.1",
     "express": "^4.16.4",
+    "moment": "^2.24.0",
     "mysql": "^2.16.0",
     "mysql2": "^1.6.5",
     "sequelize": "^5.2.0",
