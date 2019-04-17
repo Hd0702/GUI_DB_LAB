@@ -1,4 +1,3 @@
-
 use db;
 Create table Users(
 UserId VARCHAR(150) NOT NULL,

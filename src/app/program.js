@@ -5,9 +5,9 @@ const crypto = require('crypto');
 const hash = crypto.createHash('sha256');
 var moment = require('moment');
 const app = express();
-app.use(express.json())
+var bodyParser = require('body-parser').json();
 
-const port = 3000;
+const port = 4444;
 try{
   var mysql = require('mysql');
 }catch(err){
@@ -32,18 +32,39 @@ connection.connect(function(err){
     console.log(rows);
     });
 });
-app.post('/user/new/', (req, res) => {
-try{
-  var test = res.getHeader('username');
-  //res.send(req.body);
-  hash.update(res.getHeader("password"));
-  var time = moment().format('yyyy-mm-dd:hh:mm:ss');
-  connection.query('INSERT INTO User(UserId, Username, Password, DateCreated, DisplayName) VALUES ("'+uuidv4()+ '","'+ "sdsdsd" +'","' +"ssdsd" + '","' + "2019-01-01:01:01:01" + '","'+ "sdsdsd" + '");');
-}
-catch(err){
-  console.log(err);
-}
-  res.send('success');
+
+app.post('/register', bodyParser, (req, res, next) => {
+  let user = req.body['DisplayName'];
+  
+  if (user == null || user == '') {
+    res.status(400).send("displayName is blank");
+    return res.end();
+  }
+  user = user.replace("'", "''");
+  connection.query('select DisplayName from Users where DisplayName = "'+user +'";', function(err, rows, fields){
+    if(err) throw err;
+    if(rows.length !== 0){
+       console.log(rows);
+       res.status(400).send("DisplayName Exists");
+       next();
+    }
+    else {
+      if(req.body['password'] == null) {
+        return res.status(400).send("Password is blank");
+      }
+      const ps = crypto.createHash('sha256');
+      ps.update(req.body['password']);
+      let userId = uuidv4();
+        var today = new Date();
+        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+        var dateTime = date+' '+time;
+      //res.send('INSERT INTO Users(UserId, DisplayName, Password, DateCreated) VALUES("' + userId+'","' + user + '","' + hash.digest('hex') +'","' + dateTime +'");');
+      connection.query('INSERT INTO Users(UserId, DisplayName, Password, DateCreated) VALUES("' + userId+'","' + user + '","' + ps.digest('hex')+'","' + dateTime +'");');
+      res.status(200).send('success');
+      return res.end();
+    }
+  })
 });
 
 app.get('/', (req, res) => {
