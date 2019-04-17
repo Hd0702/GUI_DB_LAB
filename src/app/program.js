@@ -27,17 +27,13 @@ connection.connect(function(err){
     console.log("Error connecting database \n\n" + err);
     throw err
   } 
-  connection.query('select * from Users', function(err, rows, fields){
-    if(err) throw err;
-    console.log(rows);
-    });
 });
 
 app.post('/register', bodyParser, (req, res, next) => {
-  let user = req.body['DisplayName'];
+  let user = req.body['username'];
   
   if (user == null || user == '') {
-    res.status(400).send("displayName is blank");
+    res.status(400).send("userame is blank");
     return res.end();
   }
   user = user.replace("'", "''");
@@ -45,12 +41,12 @@ app.post('/register', bodyParser, (req, res, next) => {
     if(err) throw err;
     if(rows.length !== 0){
        console.log(rows);
-       res.status(400).send("DisplayName Exists");
+       res.status(400).send("Username Exists");
        next();
     }
     else {
       if(req.body['password'] == null) {
-        return res.status(400).send("Password is blank");
+        return res.status(400).send("password is blank");
       }
       const ps = crypto.createHash('sha256');
       ps.update(req.body['password']);
@@ -59,9 +55,9 @@ app.post('/register', bodyParser, (req, res, next) => {
         var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
         var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
         var dateTime = date+' '+time;
-      //res.send('INSERT INTO Users(UserId, DisplayName, Password, DateCreated) VALUES("' + userId+'","' + user + '","' + hash.digest('hex') +'","' + dateTime +'");');
       connection.query('INSERT INTO Users(UserId, DisplayName, Password, DateCreated) VALUES("' + userId+'","' + user + '","' + ps.digest('hex')+'","' + dateTime +'");');
-      res.status(200).send('success');
+      var text = ' { "userId": "' + userId + '", "dateCreated": "' + dateTime + '"}'; 
+      res.status(200).send(text);
       return res.end();
     }
   })
