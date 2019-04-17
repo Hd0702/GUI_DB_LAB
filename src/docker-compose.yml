@@ -15,13 +15,26 @@ services:
       MYSQL_ROOT_PASSWORD: 'password'
     ports:
       # <Port exposed> : < MySQL Port running inside container>
-      - '3.17.178.4:3306:3306'
+      - '3306:3306'
     expose:
       # Opens port 3306 on the container
       - '3306'
       # Where our data will be persisted
     volumes:
       - my-datavolume:/var/lib/mysql
+    networks:
+      app_net:
+        ipv4_address: 3.17.178.4
 # Names our volume
 volumes:
   my-datavolume:
+networks:
+  app_net:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "false"
+    ipam:
+      driver: default
+      config:
+      - subnet: 3.17.178.0/24
+        gateway: 3.17.178.1
