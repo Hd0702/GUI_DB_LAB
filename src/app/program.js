@@ -115,6 +115,67 @@ app.get('/checkuser/:username', (req, res, next) => {
   })
 });
 
+app.put('/users',upload.array(), (req, res, next) => {
+  let userId = req.body['userId'];
+  //in this route we will be taking all new information in via form data and updating it
+  //to do this in fewer sql queries we will gather all information by cheking if form data is null
+  let firstNameString = "";
+  let lastNameString = '';
+  let addressString = '';
+  let zip = req.body['zip'].toString();
+
+  if(req.body['firstName'].length != 0) {
+    let firstName = req.body['firstName'];
+    firstName = firstName.replace("'", "''");
+    firstNameString = ' FirstName = "' + firstName + '"';
+  }
+  if(req.body['lastName'].length != 0) {
+    let lastName = req.body['lastName']
+    lastName = lastName.replace("'", "''");
+    lastNameString = ' LastName = "' + lastName + '"';
+  }
+  if(req.body['address'].length != 0) {
+    let address= req.body['address'];
+    address = address.replace("'", "''");
+    addressString = ' Address = "' + address + '"';
+  }
+  if(zip.length != 0){
+    zip =  ' Zip = ' + req.body['zip'];
+  }
+  let newString = firstNameString;
+  if(newString.length != 0){
+    newString += ",";
+  }
+  newString += lastNameString;
+  if(lastNameString.length != 0){
+    newString += ',';
+  }
+  newString += addressString;
+  if(addressString.length != 0){
+    newString += ',';
+  }
+  if(zip.length != 0){
+    newString += zip;
+  }
+  if(newString[newString.length -1] == ','){
+    newString = newString.substring(0, newString.length - 1);
+  }
+  var promise = new Promise(function(resolve, reject){
+    try{
+      connection.query('UPDATE Users SET '+ newString + ' WHERE UserId = ' + userId + ';');
+      res.status(200);
+      return res.end();
+    }
+    catch(e) {
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end()
+  })
+});
+
 app.get('/', (req, res) => {
 
     res.send('Hello World');
