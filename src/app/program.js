@@ -49,7 +49,7 @@ app.post('/register', upload.array(), (req, res, next) => {
     return res.end();
   }
   user = user.replace("'", "''");
-  connection.query('select DisplayName from Users where DisplayName = "'+user +'";', function(err, rows, fields){
+  connection.query('select Username from Users where Username = "'+user +'";', function(err, rows, fields){
     if(err) throw err;
     if(rows.length !== 0){
        console.log(rows);
@@ -62,15 +62,25 @@ app.post('/register', upload.array(), (req, res, next) => {
       }
       const ps = crypto.createHash('sha256');
       ps.update(req.body['password']);
-      let userId = uuidv4();
         var today = new Date();
         var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
         var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
         var dateTime = date+' '+time;
-      connection.query('INSERT INTO Users(UserId, DisplayName, Password, DateCreated) VALUES("' + userId+'","' + user + '","' + ps.digest('hex')+'","' + dateTime +'");');
-      var text = ' { "userId": "' + userId + '", "dateCreated": "' + dateTime + '"}'; 
-      res.status(200).send(text);
-      return res.end();
+        let firstName = req.body['firstName'];
+        firstName = firstName.replace("'", "''");
+        let lastName = req.body['lastName'];
+        lastName = lastName.replace("'", "''");
+        let address = req.body['address'];
+        address = address.replace("'", "''");
+        let userId = "";
+      connection.query('INSERT INTO Users( Username, Password, DateCreated, FirstName, LastName, Address, Zip) VALUES("' + user + '","' + ps.digest('hex')+'","' + dateTime +'","' + firstName + '","' + lastName + '","' + address + '",' + req.body['zip'] + ');');
+      connection.query('SELECT userId FROM Users WHERE Username = "' + user + '";',function(err, rows, fields){
+        console.log(rows);
+        userId = rows[0]['userId'];
+        console.log(userId);
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({ userId: userId, firstName: firstName, username: user, dateCreated: dateTime, lastName: lastName, address: address, zip: req.body['zip']  }));
+      });
     }
   })
 });
@@ -82,7 +92,7 @@ app.get('/checkuser/:username', (req, res, next) => {
   userId = userId.replace("'", "''");
   var promise = new Promise(function(resolve, reject){
     try{
-      connection.query('SELECT * FROM Users WHERE DisplayName = "' + userId + '";', function(err, rows, fields){
+      connection.query('SELECT * FROM Users WHERE Username = "' + userId + '";', function(err, rows, fields){
         if(rows.length != 0){
           let userAvailable = 0;
           res.setHeader('Content-Type', 'application/json');
