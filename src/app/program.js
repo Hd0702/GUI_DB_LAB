@@ -42,6 +42,7 @@ connection.connect(function(err){
 });
 
 app.post('/register', upload.array(), (req, res, next) => {
+  //fix this to return everything but password
   let user = req.body['username'];
   if (user == null || user == '') {
     res.status(400).send(req.body);
@@ -71,6 +72,36 @@ app.post('/register', upload.array(), (req, res, next) => {
       res.status(200).send(text);
       return res.end();
     }
+  })
+});
+
+app.get('/checkuser/:username', (req, res, next) => {
+  //we are checking to see if a user exists by username
+  //we are using this during register page
+  let userId = req.params.username;
+  userId = userId.replace("'", "''");
+  var promise = new Promise(function(resolve, reject){
+    try{
+      connection.query('SELECT * FROM Users WHERE DisplayName = "' + userId + '";', function(err, rows, fields){
+        if(rows.length != 0){
+          let userAvailable = 0;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ userAvailable: 0 }));
+        }
+        else {
+          let userAvailable = 1;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ userAvailable: 1 }));
+        }
+      });
+    }
+    catch(e){
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end()
   })
 });
 
