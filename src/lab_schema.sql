@@ -1,3 +1,4 @@
+Create database db;
 use db;
 Create table Users(
 UserId int NOT NULL AUTO_INCREMENT,
@@ -11,56 +12,39 @@ IsAdmin Bit DEFAULT 0,
 DateCreated datetime,
 ProfilePicture Blob,
 PRIMARY KEY(UserId));
-CREATE table Cars(
-UserId int NOT NULL,
-CarId int,
-CarModel VARCHAR(200) NOT NULL,
-CarColor Varchar(200) NOT NULL,
-Description VARCHAR(1000),
-CarPhoto Blob,
-PRIMARY KEY(CarId),
-FOREIGN KEY(UserId) REFERENCES Users(UserId)
-);
-CREATE TABLE Parts(
-UserId int NOT NULL,
-PartId int,
-PartModel VARCHAR(200) NOT NULL,
-CarModel VARCHAR(200) NOT NULL,
-CarType VARCHAR(200),
-Description Varchar(1000),
-PartPhoto Blob,
-PRIMARY KEY(PartId),
-FOREIGN KEY(UserId) references Users(UserId)
-);
+
 CREATE Table Auctions(
 UserId int NOT NULL,
-AuctionId int,
-CarId int,
-PartId int,
+AuctionId int AUTO_INCREMENT,
 StartTime datetime NOT NULL,
 EndTime datetime NOT NULL,
-finalBid int,
+Price int NOT NULL,
+Make VARCHAR(100),
+Model VARCHAR(100),
+Year int,
+Zip int,
+Description VARCHAR(2000),
 PRIMARY KEY(AuctionId),
-FOREIGN KEY(CarId) references Cars(CarId),
- FOREIGN KEY(PartId) references Parts(PartId),
- FOREIGN KEY(UserId) references Users(UserId)
+FOREIGN KEY(UserId) references Users(UserId)
 );
-Create TABLE AuctionAudits(
+Create TABLE Bids(
 UserId int,
 AuctionId int,
-BidId int,
-TimeBid datetime NOT NULL,
-BidPrice int,
+BidId int AUTO_INCREMENT,
+Time datetime NOT NULL,
+Price int,
+PRIMARY KEY(BidId),
 FOREIGN KEY(UserId) references Users(UserId),
 FOREIGN KEY(AuctionId) references Auctions(AuctionId)
 );
-Create table Carts(
-UserId int,
-CartId int,
-CarId int,
-PartId int,
-PRIMARY KEY(CartId),
-FOREIGN KEY(UserId) references Users(UserId),
-FOREIGN KEY(CarId) references Cars(CarId),
-FOREIGN KEY(PartId) references Parts(PartId)
+Create table Ratings(
+UserId int NOT NULL,
+RaterId int NOT NULL,
+RateId int AUTO_INCREMENT,
+Description VARCHAR(2000),
+Rating int NOT NULL,
+PRIMARY KEY(RateId),
+FOREIGN KEY(UserId) REFERENCES Users(UserId),
+FOREIGN KEY(RaterId) REFERENCES Users(UserId)
 );
+
