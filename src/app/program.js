@@ -73,7 +73,7 @@ app.post('/register', upload.array(), (req, res, next) => {
         let address = req.body['address'];
         address = address.replace("'", "''");
         let userId = "";
-      connection.query('INSERT INTO Users( Username, Password, DateCreated, FirstName, LastName, Address, Zip) VALUES("' + user + '","' + ps.digest('hex')+'","' + dateTime +'","' + firstName + '","' + lastName + '","' + address + '",' + req.body['zip'] + ');');
+      connection.query('INSERT INTO Users( Username, Password, DateCreated, FirstName, LastName) VALUES("' + user + '","' + ps.digest('hex')+'","' + dateTime +'","' + firstName + '","' + lastName + ');');
       connection.query('SELECT userId FROM Users WHERE Username = "' + user + '";',function(err, rows, fields){
         console.log(rows);
         userId = rows[0]['userId'];
@@ -167,6 +167,63 @@ app.put('/users',upload.array(), (req, res, next) => {
       return res.end();
     }
     catch(e) {
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end()
+  })
+});
+
+app.get('/users/login', upload.array(),  (req, res, next) =>{
+  //this will be the login endpoint. it will take the username and password. 
+  //itll check if it is valid and if it is it will then it will return all user information
+  //if not itll return an error 
+  let username = req.body['username'];
+  username = username.replace("'", "''");
+  const ps = crypto.createHash('sha256');
+  ps.update(req.body['password']);
+  let password = ps.digest('hex');
+  var promise = new Promise(function(resolve, reject) {
+    try {
+      console.log('select * From Users where Username = "'+username+'" AND Password="'+password+'";');
+      connection.query('select * From Users where Username = "'+username+'" AND Password="'+password+'";', function(err, rows, fields){
+        if(rows.length == 0){
+          return res.status(400).send('Username or password is incorrect');
+        }
+        console.log(rows[0]);
+        res.setHeader('Content-Type', 'application/json');
+        console.log(rows);
+        res.end(JSON.stringify({ userId: rows[0]['UserId'], firstName: rows[0]['FirstName'], username: rows[0]['Username'], dateCreated: rows[0]['DateCreated'], lastName: rows[0]['LastName'], address: rows[0]['Address'], zip: rows[0]['Zip'], isAdmin: rows[0]['IsAdmin']  }));
+      });
+    }
+    catch(e){
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end()
+  })
+});
+
+app.put('/users/password', upload.array(), (req, res, next) => {
+  //this is the reset password area
+  //it takes username and password and changes it to the new password
+  let username = req.body['username'];
+  username = username.replace("'", "''");
+  const ps = crypto.createHash('sha256');
+  ps.update(req.body['password']);
+  let password = ps.digest('hex');
+  var promise = new Promise(function(resolve, reject) {
+    try {
+      //now we find user and then update the password
+      console.log('UPDATE Users SET Password = "' + password + '" WHERE Username = "'+username+'";');
+      connection.query('UPDATE Users SET Password = "' + password + '" WHERE Username = "'+username+'";');
+      res.status(200).end();
+    }
+    catch(e){
       throw e;
     }
   });

@@ -7,6 +7,7 @@ Address Varchar(300),
 Zip int,
 Username VARCHAR(100) NOT NULL,
 Password VARCHAR(150) NOT NULL,
+IsAdmin Bit DEFAULT 0,
 DateCreated datetime,
 ProfilePicture Blob,
 PRIMARY KEY(UserId));
