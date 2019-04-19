@@ -73,7 +73,7 @@ app.post('/register', upload.array(), (req, res, next) => {
         let address = req.body['address'];
         address = address.replace("'", "''");
         let userId = "";
-      connection.query('INSERT INTO Users( Username, Password, DateCreated, FirstName, LastName) VALUES("' + user + '","' + ps.digest('hex')+'","' + dateTime +'","' + firstName + '","' + lastName + ');');
+      connection.query('INSERT INTO Users( Username, Password, DateCreated, FirstName, LastName) VALUES("' + user + '","' + ps.digest('hex')+'","' + dateTime +'","' + firstName + '","' + lastName + '");');
       connection.query('SELECT userId FROM Users WHERE Username = "' + user + '";',function(err, rows, fields){
         console.log(rows);
         userId = rows[0]['userId'];
@@ -219,7 +219,6 @@ app.put('/users/password', upload.array(), (req, res, next) => {
   var promise = new Promise(function(resolve, reject) {
     try {
       //now we find user and then update the password
-      console.log('UPDATE Users SET Password = "' + password + '" WHERE Username = "'+username+'";');
       connection.query('UPDATE Users SET Password = "' + password + '" WHERE Username = "'+username+'";');
       res.status(200).end();
     }
@@ -232,7 +231,53 @@ app.put('/users/password', upload.array(), (req, res, next) => {
     return res.end()
   })
 });
+/*Auction Routes*/
+//Get all auctions
+//get all auctions
+//get all auctions bu user id join to return username too
+//get all auctions by auction id join to return username and userId associated with auction id
+//delete auction will delete by auction id
 
+app.post('/auctions', upload.array(), (req, res, next) => {
+  //this is the post route for auctions
+  //takes in userid, datecreated, endtime, carid
+  let userId = req.body['userId'];
+  let dateCreated = req.body['dateCreated'];
+  let endTime = req.body['endTime'];
+  dateCreated = new Date();
+  endTime = new Date(dateCreated);
+  endTime.setDate(endTime.getDate() + 2);
+  console.log(endTime);
+  let price = req.body['price'];
+  let make = req.body['make'];
+  let model = req.body['model'];
+  let year = req.body['year'];
+  let zip = req.body['zip'];
+  let description = req.body['description'];
+  make = make.replace("'", "''");
+  model = model.replace("'", "''");
+  description = description.replace("'", "''");
+  dateCreated = JsToSqlDateTime(dateCreated);
+  endTime = JsToSqlDateTime(endTime);
+  var promise = new Promise(function(resolve, reject){
+    try{
+      connection.query('INSERT INTO Auctions (UserId, StartTime, EndTime, Price, Make, Model, Year, Zip, Description) VALUES({0}, "{1}", "{2}", {3},"{4}", "{5}", {6}, {7}, "{8}");'.format(userId, dateCreated, endTime, price, make, model, year, zip, description));
+      //TODO: DO THEY WANT TO RETURN ANYTHING
+      res.status(200).end();
+    }
+    catch(e){
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end()
+  })
+});
+app.get('/auctions', (req, res, next) => {
+  //this returns all auctions by most recent
+  
+});
 app.get('/', (req, res) => {
 
     res.send('Hello World');
@@ -240,4 +285,24 @@ app.get('/', (req, res) => {
    
 app.listen(4444, '127.0.0.1');
    
-  
+//this function is a helper function for turning js dates into sql
+function twoDigits(d) {
+  if(0 <= d && d < 10) return "0" + d.toString();
+  if(-10 < d && d < 0) return "-0" + (-1*d).toString();
+  return d.toString();
+}
+//this function is how we convert passed in js dates into sql dates
+function JsToSqlDateTime(a) {
+  var y =  a.getFullYear() + "-" + twoDigits(1 + a.getMonth()) + "-" + twoDigits(a.getDate()) + " " + twoDigits(a.getHours()) + ":" + twoDigits(a.getHours()) + ":" + twoDigits(a.getSeconds());
+  return y;
+};
+//this helper function helps format strings easier for sql queries
+String.prototype.format = function() {
+  var s = this,
+      i = arguments.length;
+
+  while (i--) {
+      s = s.replace(new RegExp('\\{' + i + '\\}', 'gm'), arguments[i]);
+  }
+  return s;
+};
