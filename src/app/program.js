@@ -124,11 +124,11 @@ app.get('/checkuser/:username', (req, res, next) => {
   })
 });
 
-app.put('/users',upload.array(), (req, res, next) => {
+app.put('/user',upload.array(), (req, res, next) => {
   let userId = req.body['userId'];
   //in this route we will be taking all new information in via form data and updating it
   //to do this in fewer sql queries we will gather all information by cheking if form data is null
-  let firstNameString = "";
+  let firstNameString = '';
   let lastNameString = '';
   let addressString = '';
   let zip = req.body['zip'].toString();
@@ -185,7 +185,7 @@ app.put('/users',upload.array(), (req, res, next) => {
   })
 });
 
-app.post('/users/login', upload.array(),  (req, res, next) =>{
+app.post('/user/login', upload.array(),  (req, res, next) =>{
   //this will be the login endpoint. it will take the username and password. 
   //itll check if it is valid and if it is it will then it will return all user information
   //if not itll return an error 
@@ -219,7 +219,7 @@ app.post('/users/login', upload.array(),  (req, res, next) =>{
   })
 });
 
-app.put('/users/password', upload.array(), (req, res, next) => {
+app.put('/user/password', upload.array(), (req, res, next) => {
   //this is the reset password area
   //it takes username and password and changes it to the new password
   let username = req.body['username'];
@@ -249,7 +249,7 @@ app.put('/users/password', upload.array(), (req, res, next) => {
 //get all auctions by auction id join to return username and userId associated with auction id
 //delete auction will delete by auction id
 
-app.post('/auctions', upload.array(), (req, res, next) => {
+app.post('/auction', upload.array(), (req, res, next) => {
   //this is the post route for auctions
   //takes in userid, datecreated, endtime, carid
   let userId = req.body['userId'];
@@ -308,7 +308,7 @@ app.get('/auctions', (req, res, next) => {
   })
 });
 
-app.get('/auctions/users/:userId', (req,res,next) =>{
+app.get('/auctions/user/:userId', (req,res,next) =>{
   var promise = new Promise(function(resolve, reject){
     try{
       let userId = req.params.userId;
@@ -331,7 +331,7 @@ app.get('/auctions/users/:userId', (req,res,next) =>{
   })
 });
 
-app.get('/auctions/:auctionId', (req,res,next) =>{
+app.get('/auction/:auctionId', (req,res,next) =>{
   var promise = new Promise(function(resolve, reject){
     try{
       let auctionId = req.params.auctionId;
@@ -354,7 +354,7 @@ app.get('/auctions/:auctionId', (req,res,next) =>{
   })
 });
 
-app.delete('/auctions/:auctionId', (req, res, next) =>{
+app.delete('/auction/:auctionId', (req, res, next) =>{
   var promise = new Promise(function(resolve, reject){
     let auctionId = req.params.auctionId;
     auctionId = auctionId.replace("'", "''");
