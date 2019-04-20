@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.json({ type: 'application/*+json' }));
 // parse some custom thing into a Buffer
 app.use(bodyParser.raw({ type: 'application/vnd.custom-type' }));
-// parse an HTML body into a string
+// parse an HTML body into a strings
 app.use(bodyParser.text({ type: 'text/html' }));
 // parse an text body into a string
 app.use(bodyParser.text({ type: 'text/plain' }));
@@ -48,7 +48,7 @@ connection.connect(function(err){
 	if (err) {
     console.log("Error connecting database \n\n" + err);
     throw err
-  } 
+  }
 	console.log('connected');
 });
 
@@ -186,9 +186,9 @@ app.put('/user',upload.array(), (req, res, next) => {
 });
 
 app.post('/user/login', upload.array(),  (req, res, next) =>{
-  //this will be the login endpoint. it will take the username and password. 
+  //this will be the login endpoint. it will take the username and password.
   //itll check if it is valid and if it is it will then it will return all user information
-  //if not itll return an error 
+  //if not itll return an error
   let username = req.body['username'];
   username = username.replace("'", "''");
   const ps = crypto.createHash('sha256');
@@ -197,7 +197,7 @@ app.post('/user/login', upload.array(),  (req, res, next) =>{
   var promise = new Promise(function(resolve, reject) {
     try {
       console.log('select * From Users where Username = "'+username+'" AND Password="'+password+'";');
-      connection.query('select *, 1 as loginAuth From Users where Username = "'+username+'" AND Password="'+password+'";', function(err, rows, fields){
+      connection.query('Select *, 1 as loginAuth From Users where Username = "'+username+'" AND Password="'+password+'";', function(err, rows, fields){
         res.setHeader('Content-Type', 'application/json');
 	if(rows.length == 0){
 	  res.end(JSON.stringify({ loginAuth: 0}));
@@ -207,6 +207,29 @@ app.post('/user/login', upload.array(),  (req, res, next) =>{
         console.log(rows);
 	let result = rows[0];
         res.end(JSON.stringify({ loginAuth: 1, userId: rows[0]['UserId'], firstName: rows[0]['FirstName'], username: rows[0]['Username'], dateCreated: rows[0]['DateCreated'], lastName: rows[0]['LastName'], address: rows[0]['Address'], zip: rows[0]['Zip'], isAdmin: rows[0]['IsAdmin']  }));
+      });
+    }
+    catch(e){
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end()
+  })
+});
+
+app.get('/user/:userId', (req,res,next) =>{
+  var promise = new Promise(function(resolve, reject){
+    try{
+      let userId = req.params.userId;
+      userId = userId.replace("'", "''");
+      connection.query('SELECT * from Users WHERE UserId = {0}'.format(userId), function(err, rows, fields){
+        if(rows.length == 0){
+          res.status(400).send('no rows returned');
+        }
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(rows[0]));
       });
     }
     catch(e){
