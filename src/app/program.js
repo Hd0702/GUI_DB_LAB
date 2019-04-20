@@ -197,14 +197,16 @@ app.post('/users/login', upload.array(),  (req, res, next) =>{
   var promise = new Promise(function(resolve, reject) {
     try {
       console.log('select * From Users where Username = "'+username+'" AND Password="'+password+'";');
-      connection.query('select * From Users where Username = "'+username+'" AND Password="'+password+'";', function(err, rows, fields){
-        if(rows.length == 0){
-          return res.status(400).send('Username or password is incorrect');
+      connection.query('select *, 1 as loginAuth From Users where Username = "'+username+'" AND Password="'+password+'";', function(err, rows, fields){
+        res.setHeader('Content-Type', 'application/json');
+	if(rows.length == 0){
+	  res.end(JSON.stringify({ loginAuth: 0}));
+          return res.status(200);
         }
         console.log(rows[0]);
-        res.setHeader('Content-Type', 'application/json');
         console.log(rows);
-        res.end(JSON.stringify({ userId: rows[0]['UserId'], firstName: rows[0]['FirstName'], username: rows[0]['Username'], dateCreated: rows[0]['DateCreated'], lastName: rows[0]['LastName'], address: rows[0]['Address'], zip: rows[0]['Zip'], isAdmin: rows[0]['IsAdmin']  }));
+	let result = rows[0];
+        res.end(JSON.stringify({ loginAuth: 1, userId: rows[0]['UserId'], firstName: rows[0]['FirstName'], username: rows[0]['Username'], dateCreated: rows[0]['DateCreated'], lastName: rows[0]['LastName'], address: rows[0]['Address'], zip: rows[0]['Zip'], isAdmin: rows[0]['IsAdmin']  }));
       });
     }
     catch(e){
