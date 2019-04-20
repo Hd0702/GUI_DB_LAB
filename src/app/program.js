@@ -343,7 +343,19 @@ app.get('/auctions/:auctionId', (req,res,next) =>{
   })
 });
 
-   
+app.delete('/auctions/:auctionId', (req, res, next) =>{
+  var promise = new Promise(function(resolve, reject){
+    let auctionId = req.params.auctionId;
+    auctionId = auctionId.replace("'", "''");
+    connection.query('DELETE FROM Auctions WHERE AuctionId = {0}'.format(auctionId), function(err ,rows, field){
+      res.status(200).end('success');
+    });
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end()
+  })
+});
 //this function is a helper function for turning js dates into sql
 function twoDigits(d) {
   if(0 <= d && d < 10) return "0" + d.toString();
