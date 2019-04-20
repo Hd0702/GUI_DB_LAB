@@ -4,7 +4,10 @@ const uuidv4 = require('uuid/v4');
 const crypto = require('crypto');
 const hash = crypto.createHash('sha256');
 var moment = require('moment');
+var cors = require('cors'); //CORS**
 const app = express();
+app.use(cors()); //We need CORS enabled for the front end
+
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 // parse various different custom JSON types as JSON
@@ -25,7 +28,7 @@ try{
   console.log("Cannot find `mysql` module. Is it installed ? Try `npm install mysql` or `npm install`.");
 }
 
-app.listen(4444, '127.0.0.1');
+app.listen(4444, () => console.log('Server running on port 4444'));
 var connection = mysql.createConnection({
   host: "localhost",
   user: "root",
@@ -35,10 +38,11 @@ var connection = mysql.createConnection({
 });
 
 connection.connect(function(err){
-  if (err) {
+	if (err) {
     console.log("Error connecting database \n\n" + err);
     throw err
   } 
+	console.log('connected');
 });
 
 app.post('/register', upload.array(), (req, res, next) => {
@@ -70,16 +74,16 @@ app.post('/register', upload.array(), (req, res, next) => {
         firstName = firstName.replace("'", "''");
         let lastName = req.body['lastName'];
         lastName = lastName.replace("'", "''");
-        let address = req.body['address'];
-        address = address.replace("'", "''");
         let userId = "";
       connection.query('INSERT INTO Users( Username, Password, DateCreated, FirstName, LastName) VALUES("' + user + '","' + ps.digest('hex')+'","' + dateTime +'","' + firstName + '","' + lastName + '");');
-      connection.query('SELECT userId FROM Users WHERE Username = "' + user + '";',function(err, rows, fields){
+      connection.query('SELECT userId, address, zip FROM Users WHERE Username = "' + user + '";',function(err, rows, fields){
         console.log(rows);
         userId = rows[0]['userId'];
+	address = rows[0]['address'];
+	zip = rows[0]['zip'];
         console.log(userId);
         res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ userId: userId, firstName: firstName, username: user, dateCreated: dateTime, lastName: lastName, address: address, zip: req.body['zip']  }));
+        res.end(JSON.stringify({ userId: userId, firstName: firstName, username: user, dateCreated: dateTime, lastName: lastName, address: address, zip: zip  }));
       });
     }
   })
@@ -280,10 +284,10 @@ app.get('/auctions', (req, res, next) => {
   var promise = new Promise(function(resolve, reject){
     try{
       connection.query('SELECT A.UserId, AuctionId, StartTime, EndTime, Price, Make, Model, Year, A.Zip, Description, Username From Auctions A JOIN Users ON Users.UserId = A.UserId ORDER BY StartTime DESC;', function(err, rows, field) {
-        if(rows.length == 0){
+        res.setHeader('Content-Type', 'application/json');
+	if(rows.length == 0){
           res.status(400).send('no rows returned');
         }
-        res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify(rows));
       });
     }
