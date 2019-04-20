@@ -34,7 +34,14 @@ var connection = mysql.createConnection({
   user: "root",
   port: 3306,
   password: "password",
-  database: "db"
+  database: "db",
+  typeCast: function castField( field, useDefaultTypeCasting ) {
+        if ( ( field.type === "BIT" ) && ( field.length === 1 ) ) {
+            var bytes = field.buffer();
+            return( bytes[ 0 ] === 1 );
+        }
+        return( useDefaultTypeCasting() );
+    }
 });
 
 connection.connect(function(err){
@@ -178,7 +185,7 @@ app.put('/users',upload.array(), (req, res, next) => {
   })
 });
 
-app.get('/users/login', upload.array(),  (req, res, next) =>{
+app.post('/users/login', upload.array(),  (req, res, next) =>{
   //this will be the login endpoint. it will take the username and password. 
   //itll check if it is valid and if it is it will then it will return all user information
   //if not itll return an error 
