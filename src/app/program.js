@@ -79,11 +79,9 @@ app.post('/register', upload.array(), (req, res, next) => {
       connection.query('SELECT userId, address, zip FROM Users WHERE Username = "' + user + '";',function(err, rows, fields){
         console.log(rows);
         userId = rows[0]['userId'];
-	address = rows[0]['address'];
-	zip = rows[0]['zip'];
         console.log(userId);
         res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ userId: userId, firstName: firstName, username: user, dateCreated: dateTime, lastName: lastName, address: address, zip: zip  }));
+        res.end(JSON.stringify({ userId: userId, firstName: firstName, username: user, dateCreated: dateTime, lastName: lastName, address: '', zip: ''  }));
       });
     }
   })
