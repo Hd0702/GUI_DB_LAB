@@ -356,6 +356,31 @@ app.delete('/auctions/:auctionId', (req, res, next) =>{
     return res.end()
   })
 });
+/*SPRINT 3 ROUTE*/
+//Post Bid given auctionId, userId, and price
+app.post('/bid', upload.array(), (req, res, next) => {
+  console.log('se');
+  var promise = new Promise(function(resolve, reject) {
+    var today = new Date();
+    let userId = req.body['userId'];
+    let auctionId = req.body['auctionId'];
+    let price = req.body['price'];
+    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    var dateTime = date+' '+time;
+    try{
+      connection.query('INSERT INTO Bids(UserId, AuctionId, Time, Price) VALUES ({0}, {1}, "{2}", {3});'.format(userId, auctionId, dateTime, price));
+      res.status(200).end('success');
+    }
+    catch(e){
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+  })
+});
+
 //this function is a helper function for turning js dates into sql
 function twoDigits(d) {
   if(0 <= d && d < 10) return "0" + d.toString();

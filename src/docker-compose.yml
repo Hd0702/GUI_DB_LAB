@@ -22,19 +22,6 @@ services:
       # Where our data will be persisted
     volumes:
       - my-datavolume:/var/lib/mysql
-    networks:
-      app_net:
-        ipv4_address: 3.17.178.4
 # Names our volume
 volumes:
   my-datavolume:
-networks:
-  app_net:
-    driver: bridge
-    driver_opts:
-      com.docker.network.enable_ipv6: "false"
-    ipam:
-      driver: default
-      config:
-      - subnet: 3.17.178.0/24
-        gateway: 3.17.178.1
