@@ -18,7 +18,6 @@ app.use(bodyParser.text({ type: 'text/plain' }));
 // create application/x-www-form-urlencoded parser
 app.use(bodyParser.urlencoded({ extended: false }));
 var multer  = require('multer');
-
 var upload = multer() ;
 try{
   var mysql = require('mysql');
@@ -26,6 +25,7 @@ try{
   console.log("Cannot find `mysql` module. Is it installed ? Try `npm install mysql` or `npm install`.");
 }
 
+app.listen(4444, '127.0.0.1');
 var connection = mysql.createConnection({
   host: "localhost",
   user: "root",
@@ -274,16 +274,75 @@ app.post('/auctions', upload.array(), (req, res, next) => {
     return res.end()
   })
 });
+
 app.get('/auctions', (req, res, next) => {
   //this returns all auctions by most recent
-  
+  var promise = new Promise(function(resolve, reject){
+    try{
+      connection.query('SELECT A.UserId, AuctionId, StartTime, EndTime, Price, Make, Model, Year, A.Zip, Description, Username From Auctions A JOIN Users ON Users.UserId = A.UserId ORDER BY StartTime DESC;', function(err, rows, field) {
+        if(rows.length == 0){
+          res.status(400).send('no rows returned');
+        }
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(rows));
+      });
+    }
+    catch(e) {
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end()
+  })
 });
-app.get('/', (req, res) => {
 
-    res.send('Hello World');
-   });
-   
-app.listen(4444, '127.0.0.1');
+app.get('/auctions/users/:userId', (req,res,next) =>{
+  var promise = new Promise(function(resolve, reject){
+    try{
+      let userId = req.params.userId;
+      userId = userId.replace("'", "''");
+      connection.query('SELECT * from Auctions WHERE UserId = {0} ORDER BY StartTime DESC;'.format(userId), function(err, rows, fields){
+        if(rows.length == 0){
+          res.status(400).send('no rows returned');
+        }
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(rows));
+      });
+    }
+    catch(e){
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end()
+  })
+});
+
+app.get('/auctions/:auctionId', (req,res,next) =>{
+  var promise = new Promise(function(resolve, reject){
+    try{
+      let auctionId = req.params.auctionId;
+      auctionId = auctionId.replace("'", "''");
+      connection.query('SELECT A.UserId, AuctionId, StartTime, EndTime, Price, Make, Model, Year, A.Zip, Description, Username From Auctions A  JOIN Users ON Users.UserId = A.UserId WHERE AuctionId = {0} ORDER BY StartTime DESC;'.format(auctionId), function(err, rows, field)  {
+        if(rows.length == 0){
+          res.status(400).send('no rows returned');
+        }
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(rows));
+      });
+    }
+    catch(e){
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end()
+  })
+});
+
    
 //this function is a helper function for turning js dates into sql
 function twoDigits(d) {
