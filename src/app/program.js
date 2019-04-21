@@ -168,7 +168,7 @@ app.put('/user',upload.array(), (req, res, next) => {
     state = state.replace("'", "''");
     state = ' State = "' + state + '"'; 
   }
-  if(req.body['addcityress'] != undefined &&req.body['city'].length != 0) {
+  if(req.body['city'] != undefined &&req.body['city'].length != 0) {
     city = req.body['city'];
     city = city.replace("'", "''");
     city = ' City = "' + city + '"';
