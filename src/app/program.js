@@ -163,8 +163,8 @@ app.put('/user',upload.array(), (req, res, next) => {
     zip = zip.replace("'", "''");
     zip =  ' Zip = ' + zip;
   }
-  if(req.body['state'] != undefined &&req.body['state'].length != 0){
-    state = req.body['state'];
+  if(req.body['state_code'] != undefined &&req.body['state_code'].length != 0){
+    state = req.body['state_code'];
     state = state.replace("'", "''");
     state = ' State = "' + state + '"'; 
   }
@@ -422,7 +422,6 @@ app.delete('/auction/:auctionId', (req, res, next) =>{
 /*SPRINT 3 ROUTE*/
 //Post Bid given auctionId, userId, and price
 app.post('/bid', upload.array(), (req, res, next) => {
-  console.log('se');
   var promise = new Promise(function(resolve, reject) {
     var today = new Date();
     let userId = req.body['userId'];
@@ -443,7 +442,29 @@ app.post('/bid', upload.array(), (req, res, next) => {
     res.status(400).send(error);
   })
 });
-
+//add route to get bids via auction id, return highest by price
+//dont know if we need this but it sounds helpful lol
+app.get('/bid/:auctionId', (req, res, next) =>{
+var promise = new Promise(function(resolve, reject) {
+  var auctionId = req.params.auctionId;
+  auctionId = auctionId.replace("'", "''");
+  try{
+    connection.query('SELECT * FROM Bids WHERE AuctionId = {0} ORDER BY Price DESC;'.format(auctionId), function(err, rows, fields){
+      if(rows.length == 0){
+        res.status(400).send('no rows returned');
+      }
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify(rows));
+    });
+  }
+  catch(e){
+    throw e;
+  }
+});
+promise.catch(function(error){
+  res.status(400).send(error);
+})
+});
 //this function is a helper function for turning js dates into sql
 function twoDigits(d) {
   if(0 <= d && d < 10) return "0" + d.toString();
