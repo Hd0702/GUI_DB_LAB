@@ -131,7 +131,9 @@ app.put('/user',upload.array(), (req, res, next) => {
   let firstNameString = '';
   let lastNameString = '';
   let addressString = '';
-  let zip = req.body['zip'].toString();
+	if(req.body['zip']) {
+		let zip = req.body['zip'].toString();
+	}
 
   if(req.body['firstName'].length != 0) {
     let firstName = req.body['firstName'];
