@@ -131,27 +131,26 @@ app.put('/user',upload.array(), (req, res, next) => {
   let firstNameString = '';
   let lastNameString = '';
   let addressString = '';
+	let zip = '';
 	if(req.body['zip']) {
-		let zip = req.body['zip'].toString();
+		zip = req.body['zip'].toString();
+		zip =  ' Zip = ' + req.body['zip'];
 	}
 
-  if(req.body['firstName'].length != 0) {
+  if(req.body['firstName']) {
     let firstName = req.body['firstName'];
     firstName = firstName.replace("'", "''");
     firstNameString = ' FirstName = "' + firstName + '"';
   }
-  if(req.body['lastName'].length != 0) {
+  if(req.body['lastName']) {
     let lastName = req.body['lastName']
     lastName = lastName.replace("'", "''");
     lastNameString = ' LastName = "' + lastName + '"';
   }
-  if(req.body['address'].length != 0) {
+  if(req.body['address']) {
     let address= req.body['address'];
     address = address.replace("'", "''");
     addressString = ' Address = "' + address + '"';
-  }
-  if(zip.length != 0){
-    zip =  ' Zip = ' + req.body['zip'];
   }
   let newString = firstNameString;
   if(newString.length != 0){
