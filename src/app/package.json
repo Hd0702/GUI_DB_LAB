@@ -19,6 +19,7 @@
   "homepage": "https://github.com/Hd0702/GUI_DB_LAB#readme",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "express": "^4.16.4",
     "moment": "^2.24.0",

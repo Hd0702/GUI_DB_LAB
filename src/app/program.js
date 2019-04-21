@@ -51,6 +51,15 @@ connection.connect(function(err){
   }
 	console.log('connected');
 });
+app.get('/test', (req, res, next) => {
+  //THIS IS A TEST ROUTE TO GET ALL USERS
+  //DEBUG
+  connection.query('select * From Users', function(err, rows, fields){
+    console.log(rows);
+    res.status(200).send(rows);
+    res.end();
+  });
+});
 
 app.post('/register', upload.array(), (req, res, next) => {
   //fix this to return everything but password
@@ -131,26 +140,38 @@ app.put('/user',upload.array(), (req, res, next) => {
   let firstNameString = '';
   let lastNameString = '';
   let addressString = '';
-	let zip = '';
-	if(req.body['zip']) {
-		zip = req.body['zip'].toString();
-		zip =  ' Zip = ' + req.body['zip'];
-	}
-
-  if(req.body['firstName']) {
+  let zip = '';
+  let city = '';
+  let state = '';
+  if(req.body['firstName'] != undefined &&req.body['firstName'].length != 0) {
     let firstName = req.body['firstName'];
     firstName = firstName.replace("'", "''");
     firstNameString = ' FirstName = "' + firstName + '"';
   }
-  if(req.body['lastName']) {
+  if(req.body['lastName'] != undefined &&req.body['lastName'].length != 0) {
     let lastName = req.body['lastName']
     lastName = lastName.replace("'", "''");
     lastNameString = ' LastName = "' + lastName + '"';
   }
-  if(req.body['address']) {
+  if(req.body['address'] != undefined && req.body['address'].length != 0) {
     let address= req.body['address'];
     address = address.replace("'", "''");
     addressString = ' Address = "' + address + '"';
+  }
+  if(req.body['zip'] != undefined &&req.body['zip'].length != 0){
+    zip = req.body['zip'];
+    zip = zip.replace("'", "''");
+    zip =  ' Zip = ' + zip;
+  }
+  if(req.body['state'] != undefined &&req.body['state'].length != 0){
+    state = req.body['state'];
+    state = state.replace("'", "''");
+    state = ' State = "' + state + '"'; 
+  }
+  if(req.body['addcityress'] != undefined &&req.body['city'].length != 0) {
+    city = req.body['city'];
+    city = city.replace("'", "''");
+    city = ' City = "' + city + '"';
   }
   let newString = firstNameString;
   if(newString.length != 0){
@@ -164,14 +185,21 @@ app.put('/user',upload.array(), (req, res, next) => {
   if(addressString.length != 0){
     newString += ',';
   }
+  newString += zip;
   if(zip.length != 0){
-    newString += zip;
+    newString += ',';
   }
+  newString += state;
+  if(state.length != 0){
+    newString += ',';
+  }
+  newString += city;
   if(newString[newString.length -1] == ','){
     newString = newString.substring(0, newString.length - 1);
   }
   var promise = new Promise(function(resolve, reject){
     try{
+      console.log('UPDATE Users SET '+ newString + ' WHERE UserId = ' + userId + ';');
       connection.query('UPDATE Users SET '+ newString + ' WHERE UserId = ' + userId + ';');
       res.status(200);
       return res.end();
