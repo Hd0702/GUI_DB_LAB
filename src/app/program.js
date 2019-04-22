@@ -305,8 +305,8 @@ app.post('/auction', upload.array(), (req, res, next) => {
   //this is the post route for auctions
   //takes in userid, datecreated, endtime, carid
   let userId = req.body['userId'];
-  let dateCreated = req.body['dateCreated'];
-  let endTime = req.body['endTime'];
+  let dateCreated = new Date(req.body['dateCreated']);
+  let endTime = new Date(req.body['endTime']);
   let color = req.body['color'];
   let mileage = req.body['mileage'];
   color = color.replace("'", "''");
