@@ -10,7 +10,7 @@ Username VARCHAR(100) NOT NULL,
 Password VARCHAR(150) NOT NULL,
 IsAdmin Bit DEFAULT 0,
 DateCreated datetime,
-ProfilePicture Blob,
+ProfilePicture MEDIUMBLOB,
 PRIMARY KEY(UserId));
 
 CREATE Table Auctions(
@@ -18,6 +18,8 @@ UserId int NOT NULL,
 AuctionId int AUTO_INCREMENT,
 StartTime datetime NOT NULL,
 EndTime datetime NOT NULL,
+Mileage int,
+Color VARACHAR(20),
 Price int NOT NULL,
 Make VARCHAR(100),
 Model VARCHAR(100),

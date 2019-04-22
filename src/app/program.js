@@ -307,10 +307,16 @@ app.post('/auction', upload.array(), (req, res, next) => {
   let userId = req.body['userId'];
   let dateCreated = req.body['dateCreated'];
   let endTime = req.body['endTime'];
+  let color = req.body['color'];
+  let mileage = req.body['mileage'];
+  color = color.replace("'", "''");
+  mileage = mileage.replace("'", "''");
+  /***** DEBUG *******
   dateCreated = new Date();
   endTime = new Date(dateCreated);
   endTime.setDate(endTime.getDate() + 2);
   console.log(endTime);
+  */
   let price = req.body['price'];
   let make = req.body['make'];
   let model = req.body['model'];
@@ -324,9 +330,10 @@ app.post('/auction', upload.array(), (req, res, next) => {
   endTime = JsToSqlDateTime(endTime);
   var promise = new Promise(function(resolve, reject){
     try{
-      connection.query('INSERT INTO Auctions (UserId, StartTime, EndTime, Price, Make, Model, Year, Zip, Description) VALUES({0}, "{1}", "{2}", {3},"{4}", "{5}", {6}, {7}, "{8}");'.format(userId, dateCreated, endTime, price, make, model, year, zip, description));
-      //TODO: DO THEY WANT TO RETURN ANYTHING
-      res.status(200).end();
+      connection.query('INSERT INTO Auctions (UserId, StartTime, EndTime, Price, Make, Model, Year, Zip, Description, Color, Mileage) VALUES({0}, "{1}", "{2}", {3},"{4}", "{5}", {6}, {7}, "{8}", "{9}", {10});'.format(userId, dateCreated, endTime, price, make, model, year, zip, description, color, mileage), function(err, result, fields){
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({ userId: userId, auctionId: result.insertId, startTime: dateCreated, endTime: endTime, price: price, make: make, model: model, year: year, description: description, color: color, mileage: mileage   }));
+      });
     }
     catch(e){
       throw e;
