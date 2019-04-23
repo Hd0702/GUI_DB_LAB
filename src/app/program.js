@@ -332,7 +332,7 @@ app.post('/auction', upload.array(), (req, res, next) => {
     try{
       connection.query('INSERT INTO Auctions (UserId, StartTime, EndTime, Price, Make, Model, Year, Zip, Description, Color, Mileage) VALUES({0}, "{1}", "{2}", {3},"{4}", "{5}", {6}, {7}, "{8}", "{9}", {10});'.format(userId, dateCreated, endTime, price, make, model, year, zip, description, color, mileage), function(err, result, fields){
         res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ userId: userId, auctionId: result.insertId, startTime: dateCreated, endTime: endTime, price: price, make: make, model: model, year: year, description: description, color: color, mileage: mileage   }));
+        res.end(JSON.stringify({ userId: userId, auctionId: result, startTime: dateCreated, endTime: endTime, price: price, make: make, model: model, year: year, description: description, color: color, mileage: mileage   }));
       });
     }
     catch(e){
@@ -373,10 +373,10 @@ app.get('/auctions/user/:userId', (req,res,next) =>{
       let userId = req.params.userId;
       userId = userId.replace("'", "''");
       connection.query('SELECT * from Auctions WHERE UserId = {0} ORDER BY StartTime DESC;'.format(userId), function(err, rows, fields){
-        if(rows.length == 0){
+        res.setHeader('Content-Type', 'application/json');
+	if(rows.length == 0){
           res.status(400).send('no rows returned');
         }
-        res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify(rows));
       });
     }
