@@ -1,10 +1,10 @@
-Create database db;
+
 use db;
 Create table Users(
 UserId int NOT NULL AUTO_INCREMENT,
 FirstName VARCHAR(100),
-LastName Varchar(100),
-Address Varchar(300),
+LastName VARCHAR(100),
+Address VARCHAR(300),
 Zip int,
 Username VARCHAR(100) NOT NULL,
 Password VARCHAR(150) NOT NULL,
@@ -19,13 +19,14 @@ AuctionId int AUTO_INCREMENT,
 StartTime datetime NOT NULL,
 EndTime datetime NOT NULL,
 Mileage int,
-Color VARACHAR(20),
+Color VARCHAR(20),
 Price int NOT NULL,
 Make VARCHAR(100),
 Model VARCHAR(100),
 Year int,
 Zip int,
 Description VARCHAR(2000),
+CarPicture MEDIUMBLOB,
 PRIMARY KEY(AuctionId),
 FOREIGN KEY(UserId) references Users(UserId)
 );
