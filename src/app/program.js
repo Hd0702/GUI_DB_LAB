@@ -516,6 +516,26 @@ app.put('/user/image', upload.array(), (req, res, next) => {
     return res.end();
   });
 });
+
+app.put('/auction/image', upload.array(), (req, res, next) => {
+  res.setHeader('Content-Type', 'application/json');
+  var promise = new Promise(function(resolve, reject){
+    try{
+      let auctionId = req.body['auctionId'];
+      auctionId = auctionId.replace("'", "''");
+      let picture = req.body['image'];
+      connection.query('INSERT INTO Auctions(Image) VALUES({0}) WHERE AuctionId = {1};'.format(picture, auctionId));
+      return res.status(200).end();
+    }
+    catch(e){
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end();
+  });
+});
 //this function is a helper function for turning js dates into sql
 function twoDigits(d) {
   if(0 <= d && d < 10) return "0" + d.toString();

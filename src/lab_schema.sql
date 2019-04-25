@@ -10,7 +10,7 @@ Username VARCHAR(100) NOT NULL,
 Password VARCHAR(150) NOT NULL,
 IsAdmin Bit DEFAULT 0,
 DateCreated datetime,
-ProfilePicture MEDIUMBLOB,
+ProfilePicture MEDIUMTEXT,
 PRIMARY KEY(UserId));
 
 CREATE Table Auctions(
@@ -26,7 +26,7 @@ Model VARCHAR(100),
 Year int,
 Zip int,
 Description VARCHAR(2000),
-CarPicture MEDIUMBLOB,
+Image MEDIUMTEXT,
 PRIMARY KEY(AuctionId),
 FOREIGN KEY(UserId) references Users(UserId)
 );
