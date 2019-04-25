@@ -473,7 +473,7 @@ promise.catch(function(error){
 })
 });
 
-app.get('/:userId/:auction', (req, res, next) => {
+app.get('/user', (req, res, next) => {
   var promise = new Promise(function(resolve, reject) {
     try{
         connection.query('SELECT firstName, lastName, username, datecreated, COUNT(auctionId) FROM Users U JOIN Auctions A ON A.userId = U.userId;', function(err, rows, fields){
