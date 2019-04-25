@@ -472,6 +472,28 @@ promise.catch(function(error){
   res.status(400).send(error);
 })
 });
+
+app.get('/user', (req, res, next) => {
+  var promise = new Promise(function(resolve, reject) {
+    try{
+        connection.query('SELECT firstName, lastName, username, datecreated, COUNT(auctionId) FROM Users U JOIN Auctions A ON A.userId = U.userId;', function(err, rows, fields){
+          if(rows.length == 0){
+            res.status(400).send('no rows returned');
+          }
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify(rows));
+        });
+    }
+    catch(e){
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end()
+  })
+});
+
 //this function is a helper function for turning js dates into sql
 function twoDigits(d) {
   if(0 <= d && d < 10) return "0" + d.toString();
