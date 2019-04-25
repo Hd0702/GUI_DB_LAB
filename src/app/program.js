@@ -27,7 +27,8 @@ try{
 }catch(err){
   console.log("Cannot find `mysql` module. Is it installed ? Try `npm install mysql` or `npm install`.");
 }
-
+//DEBUG
+//this.res.setHeader('Content-Type', 'application/json');
 app.listen(4444, () => console.log('Server running on port 4444'));
 var connection = mysql.createConnection({
   host: "localhost",
@@ -63,6 +64,7 @@ app.get('/test', (req, res, next) => {
 
 app.post('/register', upload.array(), (req, res, next) => {
   //fix this to return everything but password
+  res.setHeader('Content-Type', 'application/json');
   let user = req.body['username'];
   if (user == null || user == '') {
     res.status(400).send(req.body);
@@ -72,7 +74,6 @@ app.post('/register', upload.array(), (req, res, next) => {
   connection.query('select Username from Users where Username = "'+user +'";', function(err, rows, fields){
     if(err) throw err;
     if(rows.length !== 0){
-       console.log(rows);
        res.status(400).send("Username Exists");
        next();
     }
@@ -91,12 +92,9 @@ app.post('/register', upload.array(), (req, res, next) => {
         let lastName = req.body['lastName'];
         lastName = lastName.replace("'", "''");
         let userId = "";
-      connection.query('INSERT INTO Users( Username, Password, DateCreated, FirstName, LastName) VALUES("' + user + '","' + ps.digest('hex')+'","' + dateTime +'","' + firstName + '","' + lastName + '");');
-      connection.query('SELECT userId, address, zip FROM Users WHERE Username = "' + user + '";',function(err, rows, fields){
-        console.log(rows);
+        connection.query('INSERT INTO Users( Username, Password, DateCreated, FirstName, LastName) VALUES("' + user + '","' + ps.digest('hex')+'","' + dateTime +'","' + firstName + '","' + lastName + '");');
+        connection.query('SELECT userId, address, zip FROM Users WHERE Username = "' + user + '";',function(err, rows, fields){
         userId = rows[0]['userId'];
-        console.log(userId);
-        res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify({ userId: userId, firstName: firstName, username: user, dateCreated: dateTime, lastName: lastName, address: '', zip: ''  }));
       });
     }
@@ -104,6 +102,7 @@ app.post('/register', upload.array(), (req, res, next) => {
 });
 
 app.get('/checkuser/:username', (req, res, next) => {
+  res.setHeader('Content-Type', 'application/json');
   //we are checking to see if a user exists by username
   //we are using this during register page
   let userId = req.params.username;
@@ -113,12 +112,10 @@ app.get('/checkuser/:username', (req, res, next) => {
       connection.query('SELECT * FROM Users WHERE Username = "' + userId + '";', function(err, rows, fields){
         if(rows.length != 0){
           let userAvailable = 0;
-          res.setHeader('Content-Type', 'application/json');
           res.end(JSON.stringify({ userAvailable: 0 }));
         }
         else {
           let userAvailable = 1;
-          res.setHeader('Content-Type', 'application/json');
           res.end(JSON.stringify({ userAvailable: 1 }));
         }
       });
@@ -134,6 +131,7 @@ app.get('/checkuser/:username', (req, res, next) => {
 });
 
 app.put('/user',upload.array(), (req, res, next) => {
+  res.setHeader('Content-Type', 'application/json');
   let userId = req.body['userId'];
   //in this route we will be taking all new information in via form data and updating it
   //to do this in fewer sql queries we will gather all information by cheking if form data is null
@@ -199,7 +197,6 @@ app.put('/user',upload.array(), (req, res, next) => {
   }
   var promise = new Promise(function(resolve, reject){
     try{
-      console.log('UPDATE Users SET '+ newString + ' WHERE UserId = ' + userId + ';');
       connection.query('UPDATE Users SET '+ newString + ' WHERE UserId = ' + userId + ';');
       res.status(200);
       return res.end();
@@ -218,6 +215,7 @@ app.post('/user/login', upload.array(),  (req, res, next) =>{
   //this will be the login endpoint. it will take the username and password.
   //itll check if it is valid and if it is it will then it will return all user information
   //if not itll return an error
+  res.setHeader('Content-Type', 'application/json');
   let username = req.body['username'];
   username = username.replace("'", "''");
   const ps = crypto.createHash('sha256');
@@ -227,7 +225,6 @@ app.post('/user/login', upload.array(),  (req, res, next) =>{
     try {
       console.log('select * From Users where Username = "'+username+'" AND Password="'+password+'";');
       connection.query('Select *, 1 as loginAuth From Users where Username = "'+username+'" AND Password="'+password+'";', function(err, rows, fields){
-        res.setHeader('Content-Type', 'application/json');
 	if(rows.length == 0){
 	  res.end(JSON.stringify({ loginAuth: 0}));
           return res.status(200);
@@ -249,6 +246,7 @@ app.post('/user/login', upload.array(),  (req, res, next) =>{
 });
 
 app.get('/user/:userId', (req,res,next) =>{
+  res.setHeader('Content-Type', 'application/json');
   var promise = new Promise(function(resolve, reject){
     try{
       let userId = req.params.userId;
@@ -257,7 +255,6 @@ app.get('/user/:userId', (req,res,next) =>{
         if(rows.length == 0){
           res.status(400).send('no rows returned');
         }
-        res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify(rows[0]));
       });
     }
@@ -274,6 +271,7 @@ app.get('/user/:userId', (req,res,next) =>{
 app.put('/user/password', upload.array(), (req, res, next) => {
   //this is the reset password area
   //it takes username and password and changes it to the new password
+  res.setHeader('Content-Type', 'application/json');
   let username = req.body['username'];
   username = username.replace("'", "''");
   const ps = crypto.createHash('sha256');
@@ -304,6 +302,7 @@ app.put('/user/password', upload.array(), (req, res, next) => {
 app.post('/auction', upload.array(), (req, res, next) => {
   //this is the post route for auctions
   //takes in userid, datecreated, endtime, carid
+  res.setHeader('Content-Type', 'application/json');
   let userId = req.body['userId'];
   let dateCreated = new Date(req.body['dateCreated']);
   let endTime = new Date(req.body['endTime']);
@@ -331,7 +330,6 @@ app.post('/auction', upload.array(), (req, res, next) => {
   var promise = new Promise(function(resolve, reject){
     try{
       connection.query('INSERT INTO Auctions (UserId, StartTime, EndTime, Price, Make, Model, Year, Zip, Description, Color, Mileage) VALUES({0}, "{1}", "{2}", {3},"{4}", "{5}", {6}, {7}, "{8}", "{9}", {10});'.format(userId, dateCreated, endTime, price, make, model, year, zip, description, color, mileage), function(err, result, fields){
-        res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify({ userId: userId, auctionId: result, startTime: dateCreated, endTime: endTime, price: price, make: make, model: model, year: year, description: description, color: color, mileage: mileage   }));
       });
     }
@@ -347,11 +345,11 @@ app.post('/auction', upload.array(), (req, res, next) => {
 
 app.get('/auctions', (req, res, next) => {
   //this returns all auctions by most recent
+  res.setHeader('Content-Type', 'application/json');
   var promise = new Promise(function(resolve, reject){
     try{
       connection.query('SELECT A.UserId, AuctionId, StartTime, EndTime, Price, Make, Model, Year, A.Zip, Description, Username From Auctions A JOIN Users ON Users.UserId = A.UserId ORDER BY StartTime DESC;', function(err, rows, field) {
-        res.setHeader('Content-Type', 'application/json');
-	if(rows.length == 0){
+	      if(rows.length == 0){
           res.status(400).send('no rows returned');
         }
         res.end(JSON.stringify(rows));
@@ -368,13 +366,13 @@ app.get('/auctions', (req, res, next) => {
 });
 
 app.get('/auctions/user/:userId', (req,res,next) =>{
+  res.setHeader('Content-Type', 'application/json');
   var promise = new Promise(function(resolve, reject){
     try{
       let userId = req.params.userId;
       userId = userId.replace("'", "''");
       connection.query('SELECT * from Auctions WHERE UserId = {0} ORDER BY StartTime DESC;'.format(userId), function(err, rows, fields){
-        res.setHeader('Content-Type', 'application/json');
-	if(rows.length == 0){
+	      if(rows.length == 0){
           res.status(400).send('no rows returned');
         }
         res.end(JSON.stringify(rows));
@@ -391,6 +389,7 @@ app.get('/auctions/user/:userId', (req,res,next) =>{
 });
 
 app.get('/auction/:auctionId', (req,res,next) =>{
+  res.setHeader('Content-Type', 'application/json');
   var promise = new Promise(function(resolve, reject){
     try{
       let auctionId = req.params.auctionId;
@@ -399,7 +398,6 @@ app.get('/auction/:auctionId', (req,res,next) =>{
         if(rows.length == 0){
           res.status(400).send('no rows returned');
         }
-        res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify(rows));
       });
     }
@@ -414,6 +412,7 @@ app.get('/auction/:auctionId', (req,res,next) =>{
 });
 
 app.delete('/auction/:auctionId', (req, res, next) =>{
+  res.setHeader('Content-Type', 'application/json');
   var promise = new Promise(function(resolve, reject){
     let auctionId = req.params.auctionId;
     auctionId = auctionId.replace("'", "''");
@@ -429,6 +428,7 @@ app.delete('/auction/:auctionId', (req, res, next) =>{
 /*SPRINT 3 ROUTE*/
 //Post Bid given auctionId, userId, and price
 app.post('/bid', upload.array(), (req, res, next) => {
+  res.setHeader('Content-Type', 'application/json');
   var promise = new Promise(function(resolve, reject) {
     var today = new Date();
     let userId = req.body['userId'];
@@ -452,6 +452,7 @@ app.post('/bid', upload.array(), (req, res, next) => {
 //add route to get bids via auction id, return highest by price
 //dont know if we need this but it sounds helpful lol
 app.get('/bid/:auctionId', (req, res, next) =>{
+  res.setHeader('Content-Type', 'application/json');
 var promise = new Promise(function(resolve, reject) {
   var auctionId = req.params.auctionId;
   auctionId = auctionId.replace("'", "''");
@@ -460,7 +461,6 @@ var promise = new Promise(function(resolve, reject) {
       if(rows.length == 0){
         res.status(400).send('no rows returned');
       }
-      res.setHeader('Content-Type', 'application/json');
       res.end(JSON.stringify(rows));
     });
   }
