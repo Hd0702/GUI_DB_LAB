@@ -310,12 +310,14 @@ app.post('/auction', upload.array(), (req, res, next) => {
   let mileage = req.body['mileage'];
   color = color.replace("'", "''");
   mileage = mileage.replace("'", "''");
+
   /***** DEBUG *******
   dateCreated = new Date();
   endTime = new Date(dateCreated);
   endTime.setDate(endTime.getDate() + 2);
   console.log(endTime);
   */
+
   let price = req.body['price'];
   let make = req.body['make'];
   let model = req.body['model'];
@@ -452,7 +454,7 @@ app.post('/bid', upload.array(), (req, res, next) => {
 //add route to get bids via auction id, return highest by price
 //dont know if we need this but it sounds helpful lol
 app.get('/bid/:auctionId', (req, res, next) =>{
-  res.setHeader('Content-Type', 'application/json');
+res.setHeader('Content-Type', 'application/json');
 var promise = new Promise(function(resolve, reject) {
   var auctionId = req.params.auctionId;
   auctionId = auctionId.replace("'", "''");
@@ -474,13 +476,13 @@ promise.catch(function(error){
 });
 
 app.get('/user', (req, res, next) => {
+  res.setHeader('Content-Type', 'application/json');
   var promise = new Promise(function(resolve, reject) {
     try{
         connection.query('SELECT firstName, lastName, username, datecreated, COUNT(auctionId) FROM Users U JOIN Auctions A ON A.userId = U.userId;', function(err, rows, fields){
           if(rows.length == 0){
             res.status(400).send('no rows returned');
           }
-          res.setHeader('Content-Type', 'application/json');
           res.end(JSON.stringify(rows));
         });
     }
@@ -494,6 +496,26 @@ app.get('/user', (req, res, next) => {
   })
 });
 
+app.put('/user/image', upload.array(), (req, res, next) => {
+  res.setHeader('Content-Type', 'application/json');
+  //this route adds a profile image by userId
+  var promise = new Promise(function(resolve, reject){
+    try{
+      let userId = req.body['userId'];
+      userId = userId.replace("'", "''");
+      let picture = req.body['profilePicture'];
+      connection.query('INSERT into Users(ProfilePicture) VALUES({0}) WHERE UserId = {1};'.format(picture, userId));
+      return res.status(200).end();
+    }
+    catch(e) {
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end();
+  });
+});
 //this function is a helper function for turning js dates into sql
 function twoDigits(d) {
   if(0 <= d && d < 10) return "0" + d.toString();
