@@ -118,9 +118,10 @@ app.post('/register', upload.array(), (req, res, next) => {
         firstName = firstName.replace("'", "''");
         let lastName = req.body['lastName'];
         lastName = lastName.replace("'", "''");
+        let picture = req.body['profilePicture'];   
         let userId = "";
-        connection.query('INSERT INTO Users( Username, Password, DateCreated, FirstName, LastName) VALUES("' + user + '","' + ps.digest('hex')+'","' + dateTime +'","' + firstName + '","' + lastName + '");');
-        connection.query('SELECT userId, address, zip FROM Users WHERE Username = "' + user + '";',function(err, rows, fields){
+        connection.query('INSERT INTO Users( Username, Password, DateCreated, FirstName, LastName, ProfilePicture) VALUES("' + user + '","' + ps.digest('hex')+'","' + dateTime +'","' + firstName + '","' + lastName + ',"{0}");'.format(profilePicture));
+        connection.query('SELECT userId, address, zip, ProfilePicture FROM Users WHERE Username = "' + user + '";',function(err, rows, fields){
         userId = rows[0]['userId'];
         res.end(JSON.stringify({ userId: userId, firstName: firstName, username: user, dateCreated: dateTime, lastName: lastName, address: '', zip: ''  }));
       });
@@ -259,7 +260,7 @@ app.post('/user/login', upload.array(),  (req, res, next) =>{
         console.log(rows[0]);
         console.log(rows);
 	let result = rows[0];
-        res.end(JSON.stringify({ loginAuth: 1, userId: rows[0]['UserId'], firstName: rows[0]['FirstName'], username: rows[0]['Username'], dateCreated: rows[0]['DateCreated'], lastName: rows[0]['LastName'], address: rows[0]['Address'], zip: rows[0]['Zip'], isAdmin: rows[0]['IsAdmin']  }));
+        res.end(JSON.stringify({ loginAuth: 1, userId: rows[0]['UserId'], firstName: rows[0]['FirstName'], username: rows[0]['Username'], dateCreated: rows[0]['DateCreated'], lastName: rows[0]['LastName'], address: rows[0]['Address'], zip: rows[0]['Zip'], isAdmin: rows[0]['IsAdmin'], profilePicture: rows[0]['ProfilePicture']  }));
       });
     }
     catch(e){
