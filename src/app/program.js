@@ -530,7 +530,7 @@ app.put('/user/image', upload.array(), (req, res, next) => {
       let userId = req.body['userId'];
       userId = userId.replace("'", "''");
       let picture = req.body['profilePicture'];
-      connection.query('INSERT into Users(ProfilePicture) VALUES({0}) WHERE UserId = {1};'.format(picture, userId));
+      connection.query('INSERT into Users(ProfilePicture) VALUES("{0}") WHERE UserId = {1};'.format(picture, userId));
       return res.status(200).end();
     }
     catch(e) {
@@ -551,7 +551,7 @@ app.put('/auction/image', upload.array(), (req, res, next) => {
       let auctionId = req.body['auctionId'];
       auctionId = auctionId.replace("'", "''");
       let picture = req.body['image'];
-      connection.query('INSERT INTO Auctions(Image) VALUES({0}) WHERE AuctionId = {1};'.format(picture, auctionId));
+      connection.query('INSERT INTO Auctions(Image) VALUES("{0}") WHERE AuctionId = {1};'.format(picture, auctionId));
       return res.status(200).end();
     }
     catch(e){
