@@ -57,7 +57,7 @@ app.get('/users', (req, res, next) => {
   res.setHeader('Content-Type', 'application/json');
   var promise = new Promise(function(resolve, reject){
     try{
-      connection.query('select UserId, FirstName, LastName,Address, Zip, Username, IsAdmin, DateCreated, ProfilePicture, City,State From Users;', function(err, rows, fields){
+      connection.query('select UserId, FirstName, LastName,Address, Zip, Username, IsAdmin, DateCreated, ProfilePicture, City, State From Users;', function(err, rows, fields){
         console.log(rows);
         res.status(200).send(rows);
         res.end();
@@ -343,7 +343,7 @@ app.post('/auction', upload.array(), (req, res, next) => {
   var promise = new Promise(function(resolve, reject){
     try{
       connection.query('INSERT INTO Auctions (UserId, StartTime, EndTime, Price, Make, Model, Year, Zip, Description, Color, Mileage) VALUES({0}, "{1}", "{2}", {3},"{4}", "{5}", {6}, {7}, "{8}", "{9}", {10});'.format(userId, dateCreated, endTime, price, make, model, year, zip, description, color, mileage), function(err, result, fields){
-        res.end(JSON.stringify({ userId: userId, auctionId: result, startTime: dateCreated, endTime: endTime, price: price, make: make, model: model, year: year, description: description, color: color, mileage: mileage   }));
+        res.end(JSON.stringify({ userId: userId, auctionId: result['insertId'], startTime: dateCreated, endTime: endTime, price: price, make: make, model: model, year: year, description: description, color: color, mileage: mileage   }));
       });
     }
     catch(e){
@@ -569,6 +569,32 @@ app.put('/user/admin/:userId', (req,res, next) =>{
   });
 });
 
+app.get('/user/rating/:userId', (req, res, next) =>{
+  //this route gets a user and then returns user info, amount of auctions they have, and average rating
+  res.setHeader('Content-Type', 'application/json');
+  var promise = new Promise(function(resolve, reject){
+    try{
+      let userId = req.params.userId;
+      userId = userId.replace("'", "''");
+      connection.query('select u.UserId, u.FirstName, u.LastName, u.Address, u.Zip, u.Username, u.IsAdmin, u.DateCreated, u.ProfilePicture, u.City, u.State, COUNT(AuctionId), AVG(Rating) From Users u JOIN Auctions A ON A.UserId = u.UserId JOIN Ratings R ON R.UserId = u.UserId WHERE u.UserId = {0}'.format(userId), function(err, rows, fields){
+        if(rows.length == 0){
+          res.status(400).send('no rows returned');
+        }
+        else{
+          rows[0]['COUNT(AuctionId)'] /= 2;
+        }
+        res.end(JSON.stringify(rows));
+      });
+    }
+    catch(e){
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end();
+  });
+});
 //this function is a helper function for turning js dates into sql
 function twoDigits(d) {
   if(0 <= d && d < 10) return "0" + d.toString();
