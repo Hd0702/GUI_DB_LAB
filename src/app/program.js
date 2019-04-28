@@ -52,14 +52,25 @@ connection.connect(function(err){
   }
 	console.log('connected');
 });
-app.get('/test', (req, res, next) => {
-  //THIS IS A TEST ROUTE TO GET ALL USERS
-  //DEBUG
-  connection.query('select * From Users', function(err, rows, fields){
-    console.log(rows);
-    res.status(200).send(rows);
-    res.end();
+//get all users everything but password route
+app.get('/users', (req, res, next) => {
+  res.setHeader('Content-Type', 'application/json');
+  var promise = new Promise(function(resolve, reject){
+    try{
+      connection.query('select UserId, FirstName, LastName,Address, Zip, Username, IsAdmin, DateCreated, ProfilePicture, City,State From Users;', function(err, rows, fields){
+        console.log(rows);
+        res.status(200).send(rows);
+        res.end();
+      });
+    }
+    catch(e){
+      throw e;
+    }
   });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end()
+  })
 });
 
 app.post('/register', upload.array(), (req, res, next) => {
@@ -518,6 +529,7 @@ app.put('/user/image', upload.array(), (req, res, next) => {
 });
 
 app.put('/auction/image', upload.array(), (req, res, next) => {
+  //this function inserts the auction image
   res.setHeader('Content-Type', 'application/json');
   var promise = new Promise(function(resolve, reject){
     try{
@@ -536,6 +548,27 @@ app.put('/auction/image', upload.array(), (req, res, next) => {
     return res.end();
   });
 });
+
+app.put('/user/admin/:userId', (req,res, next) =>{
+  //this route toggles if a user is an admin or not
+  res.setHeader('Content-Type', 'application/json');
+  var promise = new Promise(function(resolve, reject){
+    try{
+      let userId = req.params.userId;
+      userId = userId.replace("'", "''");
+      connection.query('UPDATE Users SET IsAdmin = IsAdmin ^ 1 Where UserId= {0};'.format(userId));
+      res.status(200).end();
+    }
+    catch(e){
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end();
+  });
+});
+
 //this function is a helper function for turning js dates into sql
 function twoDigits(d) {
   if(0 <= d && d < 10) return "0" + d.toString();
