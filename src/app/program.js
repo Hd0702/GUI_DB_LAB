@@ -32,36 +32,34 @@ try{
 app.listen(4444, () => console.log('Server running on port 4444'));
 
 //this code was definitely not taken from stackoverflow
-function handleDisconnect() {
-  var connection = mysql.createConnection({
-    host: "127.0.0.1",
-    user: "root",
+var db_config = {
+  host: 'localhost',
+    user: 'root',
     port: 3306,
-    password: "password",
-    database: "db",
-    typeCast: function castField( field, useDefaultTypeCasting ) {
-          if ( ( field.type === "BIT" ) && ( field.length === 1 ) ) {
-              var bytes = field.buffer();
-              return( bytes[ 0 ] === 1 );
-          }
-          return( useDefaultTypeCasting() );
-      }
-    });
+    password: 'password',
+    database: 'db'
+};
+
+var connection;
+
+function handleDisconnect() {
+  connection = mysql.createConnection(db_config); 
+
   connection.connect(function(err) {            
-    if(err) {                               
+    if(err) {           
       console.log('error when connecting to db:', err);
       setTimeout(handleDisconnect, 2000);
-    }
-    else{
+    }          
+    else {
       console.log('connected');
-    }   
-  });     
+    }                           
+  });                                   
   connection.on('error', function(err) {
     console.log('db error', err);
-    if(err.code === 'PROTOCOL_CONNECTION_LOST') {
-      handleDisconnect();                       
-    } else {                                      
-      throw err;                                  
+    if(err.code === 'PROTOCOL_CONNECTION_LOST') { 
+      handleDisconnect();                      
+    } else {                                    
+      throw err;                            
     }
   });
 }
@@ -120,10 +118,10 @@ app.post('/register', upload.array(), (req, res, next) => {
         lastName = lastName.replace("'", "''");
         let picture = req.body['profilePicture'];   
         let userId = "";
-        connection.query('INSERT INTO Users( Username, Password, DateCreated, FirstName, LastName, ProfilePicture) VALUES("' + user + '","' + ps.digest('hex')+'","' + dateTime +'","' + firstName + '","' + lastName + ',"{0}");'.format(profilePicture));
+        connection.query('INSERT INTO Users( Username, Password, DateCreated, FirstName, LastName, ProfilePicture) VALUES("' + user + '","' + ps.digest('hex')+'","' + dateTime +'","' + firstName + '","' + lastName + '","{0}");'.format(picture));
         connection.query('SELECT userId, address, zip, ProfilePicture FROM Users WHERE Username = "' + user + '";',function(err, rows, fields){
         userId = rows[0]['userId'];
-        res.end(JSON.stringify({ userId: userId, firstName: firstName, username: user, dateCreated: dateTime, lastName: lastName, address: '', zip: ''  }));
+        res.end(JSON.stringify({ userId: userId, firstName: firstName, username: user, dateCreated: dateTime, lastName: lastName, address: '', zip: '', profilePicture: rows[0]['ProfilePicture']  }));
       });
     }
   })
@@ -339,7 +337,7 @@ app.post('/auction', upload.array(), (req, res, next) => {
   color = color.replace("'", "''");
   mileage = mileage.replace("'", "''");
 
-  /***** DEBUG *******
+  /***** DEBUG ******
   dateCreated = new Date();
   endTime = new Date(dateCreated);
   endTime.setDate(endTime.getDate() + 2);
