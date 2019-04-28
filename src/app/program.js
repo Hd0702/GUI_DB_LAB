@@ -30,28 +30,44 @@ try{
 //DEBUG
 //this.res.setHeader('Content-Type', 'application/json');
 app.listen(4444, () => console.log('Server running on port 4444'));
-var connection = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  port: 3306,
-  password: "password",
-  database: "db",
-  typeCast: function castField( field, useDefaultTypeCasting ) {
-        if ( ( field.type === "BIT" ) && ( field.length === 1 ) ) {
-            var bytes = field.buffer();
-            return( bytes[ 0 ] === 1 );
-        }
-        return( useDefaultTypeCasting() );
-    }
-});
 
-connection.connect(function(err){
-	if (err) {
-    console.log("Error connecting database \n\n" + err);
-    throw err
-  }
-	console.log('connected');
-});
+//this code was definitely not taken from stackoverflow
+function handleDisconnect() {
+  var connection = mysql.createConnection({
+    host: "127.0.0.1",
+    user: "root",
+    port: 3306,
+    password: "password",
+    database: "db",
+    typeCast: function castField( field, useDefaultTypeCasting ) {
+          if ( ( field.type === "BIT" ) && ( field.length === 1 ) ) {
+              var bytes = field.buffer();
+              return( bytes[ 0 ] === 1 );
+          }
+          return( useDefaultTypeCasting() );
+      }
+    });
+  connection.connect(function(err) {            
+    if(err) {                               
+      console.log('error when connecting to db:', err);
+      setTimeout(handleDisconnect, 2000);
+    }
+    else{
+      console.log('connected');
+    }   
+  });     
+  connection.on('error', function(err) {
+    console.log('db error', err);
+    if(err.code === 'PROTOCOL_CONNECTION_LOST') {
+      handleDisconnect();                       
+    } else {                                      
+      throw err;                                  
+    }
+  });
+}
+
+handleDisconnect();
+
 //get all users everything but password route
 app.get('/users', (req, res, next) => {
   res.setHeader('Content-Type', 'application/json');
