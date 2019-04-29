@@ -11,7 +11,7 @@ app.use(cors()); //We need CORS enabled for the front end
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 // parse various different custom JSON types as JSON
-app.use(bodyParser.json({ type: 'application/*+json' }));
+app.use(bodyParser.json({limit: '10mb', extended: true}));
 // parse some custom thing into a Buffer
 app.use(bodyParser.raw({ type: 'application/vnd.custom-type' }));
 // parse an HTML body into a strings
@@ -19,7 +19,7 @@ app.use(bodyParser.text({ type: 'text/html' }));
 // parse an text body into a string
 app.use(bodyParser.text({ type: 'text/plain' }));
 // create application/x-www-form-urlencoded parser
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({limit: '10mb', extended: true}));
 var multer  = require('multer');
 var upload = multer() ;
 try{
@@ -43,23 +43,23 @@ var db_config = {
 var connection;
 
 function handleDisconnect() {
-  connection = mysql.createConnection(db_config); 
+  connection = mysql.createConnection(db_config);
 
-  connection.connect(function(err) {            
-    if(err) {           
+  connection.connect(function(err) {
+    if(err) {
       console.log('error when connecting to db:', err);
       setTimeout(handleDisconnect, 2000);
-    }          
+    }
     else {
       console.log('connected');
-    }                           
-  });                                   
+    }
+  });
   connection.on('error', function(err) {
     console.log('db error', err);
-    if(err.code === 'PROTOCOL_CONNECTION_LOST') { 
-      handleDisconnect();                      
-    } else {                                    
-      throw err;                            
+    if(err.code === 'PROTOCOL_CONNECTION_LOST') {
+      handleDisconnect();
+    } else {
+      throw err;
     }
   });
 }
@@ -116,7 +116,7 @@ app.post('/register', upload.array(), (req, res, next) => {
         firstName = firstName.replace("'", "''");
         let lastName = req.body['lastName'];
         lastName = lastName.replace("'", "''");
-        let picture = req.body['profilePicture'];   
+        let picture = req.body['profilePicture'];
         let userId = "";
         connection.query('INSERT INTO Users( Username, Password, DateCreated, FirstName, LastName, ProfilePicture) VALUES("' + user + '","' + ps.digest('hex')+'","' + dateTime +'","' + firstName + '","' + lastName + '","{0}");'.format(picture));
         connection.query('SELECT userId, address, zip, ProfilePicture FROM Users WHERE Username = "' + user + '";',function(err, rows, fields){
@@ -167,6 +167,7 @@ app.put('/user',upload.array(), (req, res, next) => {
   let zip = '';
   let city = '';
   let state = '';
+	console.log(req.body)
   if(req.body['firstName'] != undefined &&req.body['firstName'].length != 0) {
     let firstName = req.body['firstName'];
     firstName = firstName.replace("'", "''");
@@ -190,7 +191,7 @@ app.put('/user',upload.array(), (req, res, next) => {
   if(req.body['state_code'] != undefined &&req.body['state_code'].length != 0){
     state = req.body['state_code'];
     state = state.replace("'", "''");
-    state = ' State = "' + state + '"'; 
+    state = ' State = "' + state + '"';
   }
   if(req.body['city'] != undefined &&req.body['city'].length != 0) {
     city = req.body['city'];
@@ -516,7 +517,7 @@ app.get('/users/auctions', (req, res, next) => {
           });
         }
           res.end(JSON.stringify(rows));
-          
+
         });
     }
     catch(e){
@@ -534,10 +535,10 @@ app.put('/user/image', upload.array(), (req, res, next) => {
   //this route adds a profile image by userId
   var promise = new Promise(function(resolve, reject){
     try{
+      console.log(req.body);
       let userId = req.body['userId'];
-      userId = userId.replace("'", "''");
-      let picture = req.body['profilePicture'];
-      connection.query('INSERT into Users(ProfilePicture) VALUES("{0}") WHERE UserId = {1};'.format(picture, userId));
+      let picture = req.body['profilePicture'].toString();
+      connection.query('UPDATE Users SET ProfilePicture = "'+ picture +'" WHERE UserId = {0};'.format(userId));
       return res.status(200).end();
     }
     catch(e) {
@@ -545,6 +546,7 @@ app.put('/user/image', upload.array(), (req, res, next) => {
     }
   });
   promise.catch(function(error){
+		console.log(error);
     res.status(400).send(error);
     return res.end();
   });
@@ -556,9 +558,8 @@ app.put('/auction/image', upload.array(), (req, res, next) => {
   var promise = new Promise(function(resolve, reject){
     try{
       let auctionId = req.body['auctionId'];
-      auctionId = auctionId.replace("'", "''");
       let picture = req.body['image'];
-      connection.query('INSERT INTO Auctions(Image) VALUES("{0}") WHERE AuctionId = {1};'.format(picture, auctionId));
+			connection.query('UPDATE Auctions SET Image = {0} WHERE AuctionId = {1};'.format(picture, auctionId));
       return res.status(200).end();
     }
     catch(e){
