@@ -28,7 +28,7 @@ Zip int,
 Description VARCHAR(2000),
 Image MEDIUMTEXT,
 PRIMARY KEY(AuctionId),
-FOREIGN KEY(UserId) references Users(UserId) ON DELETE CASCADE
+FOREIGN KEY(UserId) references Users(UserId)
 );
 Create TABLE Bids(
 UserId int,
@@ -37,8 +37,8 @@ BidId int AUTO_INCREMENT,
 Time datetime NOT NULL,
 Price int,
 PRIMARY KEY(BidId),
-FOREIGN KEY(UserId) references Users(UserId) ON DELETE CASCADE,
-FOREIGN KEY(AuctionId) references Auctions(AuctionId) ON DELETE CASCADE
+FOREIGN KEY(UserId) references Users(UserId),
+FOREIGN KEY(AuctionId) references Auctions(AuctionId)
 );
 Create table Ratings(
 UserId int NOT NULL,
@@ -47,6 +47,6 @@ RateId int AUTO_INCREMENT,
 Description VARCHAR(2000),
 Rating int NOT NULL,
 PRIMARY KEY(RateId),
-FOREIGN KEY(UserId) REFERENCES Users(UserId) ON DELETE CASCADE,
-FOREIGN KEY(RaterId) REFERENCES Users(UserId) ON DELETE CASCADE
+FOREIGN KEY(UserId) REFERENCES Users(UserId),
+FOREIGN KEY(RaterId) REFERENCES Users(UserId)
 );
