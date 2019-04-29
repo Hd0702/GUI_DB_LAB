@@ -71,7 +71,27 @@ app.get('/users', (req, res, next) => {
   res.setHeader('Content-Type', 'application/json');
   var promise = new Promise(function(resolve, reject){
     try{
-      connection.query('select UserId, FirstName, LastName,Address, Zip, Username, IsAdmin, DateCreated, ProfilePicture, City, State From Users;', function(err, rows, fields){
+      connection.query('Select UserId, FirstName, LastName, Address, Zip, Username, IsAdmin, DateCreated, ProfilePicture, City, State From Users;', function(err, rows, fields){
+        console.log(rows);
+        res.status(200).send(rows);
+        res.end();
+      });
+    }
+    catch(e){
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end()
+  })
+});
+
+app.get('/usersPublic', (req, res, next) => {
+  res.setHeader('Content-Type', 'application/json');
+  var promise = new Promise(function(resolve, reject){
+    try{
+      connection.query('Select UserId, FirstName, LastName, Zip, Username, DateCreated, ProfilePicture, 5 as CarsListed, 5 as AvgRating From Users;', function(err, rows, fields){
         console.log(rows);
         res.status(200).send(rows);
         res.end();
