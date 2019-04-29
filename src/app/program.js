@@ -98,7 +98,7 @@ app.post('/register', upload.array(), (req, res, next) => {
   user = user.replace("'", "''");
   connection.query('select Username from Users where Username = "'+user +'";', function(err, rows, fields){
     if(err) throw err;
-    if(rows.length !== 0){
+    if( rows.length !== 0){
        res.status(400).send("Username Exists");
        next();
     }
@@ -136,7 +136,7 @@ app.get('/checkuser/:username', (req, res, next) => {
   var promise = new Promise(function(resolve, reject){
     try{
       connection.query('SELECT * FROM Users WHERE Username = "' + userId + '";', function(err, rows, fields){
-        if(rows.length != 0){
+        if(rows == null || rows.length != 0){
           let userAvailable = 0;
           res.end(JSON.stringify({ userAvailable: 0 }));
         }
@@ -251,7 +251,7 @@ app.post('/user/login', upload.array(),  (req, res, next) =>{
     try {
       console.log('select * From Users where Username = "'+username+'" AND Password="'+password+'";');
       connection.query('Select *, 1 as loginAuth From Users where Username = "'+username+'" AND Password="'+password+'";', function(err, rows, fields){
-	if(rows.length == 0){
+	if(rows == null  ||rows.length == 0){
 	  res.end(JSON.stringify({ loginAuth: 0}));
           return res.status(200);
         }
@@ -278,7 +278,7 @@ app.get('/user/:userId', (req,res,next) =>{
       let userId = req.params.userId;
       userId = userId.replace("'", "''");
       connection.query('SELECT * from Users WHERE UserId = {0}'.format(userId), function(err, rows, fields){
-        if(rows.length == 0){
+        if(rows == null ||rows.length == 0){
           res.status(400).send('no rows returned');
         }
         res.end(JSON.stringify(rows[0]));
@@ -377,7 +377,7 @@ app.get('/auctions', (req, res, next) => {
   var promise = new Promise(function(resolve, reject){
     try{
       connection.query('SELECT A.UserId, AuctionId, StartTime, EndTime, Price, Make, Model, Year, A.Zip, Description, Username From Auctions A JOIN Users ON Users.UserId = A.UserId ORDER BY StartTime DESC;', function(err, rows, field) {
-	      if(rows.length == 0){
+	      if(rows == null ||rows.length == 0){
           res.status(400).send('no rows returned');
         }
         res.end(JSON.stringify(rows));
@@ -400,7 +400,7 @@ app.get('/auctions/user/:userId', (req,res,next) =>{
       let userId = req.params.userId;
       userId = userId.replace("'", "''");
       connection.query('SELECT * from Auctions WHERE UserId = {0} ORDER BY StartTime DESC;'.format(userId), function(err, rows, fields){
-	      if(rows.length == 0){
+	      if(rows == null ||rows.length == 0){
           res.status(400).send('no rows returned');
         }
         res.end(JSON.stringify(rows));
@@ -423,7 +423,7 @@ app.get('/auction/:auctionId', (req,res,next) =>{
       let auctionId = req.params.auctionId;
       auctionId = auctionId.replace("'", "''");
       connection.query('SELECT A.UserId, AuctionId, StartTime, EndTime, Price, Make, Model, Year, A.Zip, Description, Username From Auctions A  JOIN Users ON Users.UserId = A.UserId WHERE AuctionId = {0} ORDER BY StartTime DESC;'.format(auctionId), function(err, rows, field)  {
-        if(rows.length == 0){
+        if(rows == null  ||rows.length == 0){
           res.status(400).send('no rows returned');
         }
         res.end(JSON.stringify(rows));
@@ -486,7 +486,7 @@ var promise = new Promise(function(resolve, reject) {
   auctionId = auctionId.replace("'", "''");
   try{
     connection.query('SELECT * FROM Bids WHERE AuctionId = {0} ORDER BY Price DESC;'.format(auctionId), function(err, rows, fields){
-      if(rows.length == 0){
+      if(rows == null  ||rows.length == 0){
         res.status(400).send('no rows returned');
       }
       res.end(JSON.stringify(rows));
@@ -506,7 +506,7 @@ app.get('/user', (req, res, next) => {
   var promise = new Promise(function(resolve, reject) {
     try{
         connection.query('SELECT firstName, lastName, username, datecreated, COUNT(auctionId) FROM Users U JOIN Auctions A ON A.userId = U.userId;', function(err, rows, fields){
-          if(rows.length == 0){
+          if(rows == null ||rows.length == 0){
             res.status(400).send('no rows returned');
           }
           res.end(JSON.stringify(rows));
@@ -592,7 +592,7 @@ app.get('/user/rating/:userId', (req, res, next) =>{
       let userId = req.params.userId;
       userId = userId.replace("'", "''");
       connection.query('select u.UserId, u.FirstName, u.LastName, u.Address, u.Zip, u.Username, u.IsAdmin, u.DateCreated, u.ProfilePicture, u.City, u.State, COUNT(AuctionId), AVG(Rating) From Users u JOIN Auctions A ON A.UserId = u.UserId JOIN Ratings R ON R.UserId = u.UserId WHERE u.UserId = {0}'.format(userId), function(err, rows, fields){
-        if(rows.length == 0){
+        if(rows == null || rows.length == 0){
           res.status(400).send('no rows returned');
         }
         else{
