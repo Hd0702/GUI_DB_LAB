@@ -37,7 +37,14 @@ var db_config = {
     user: 'root',
     port: 3306,
     password: 'password',
-    database: 'db'
+    database: 'db',
+		typeCast: function castField( field, useDefaultTypeCasting ) {
+        if ( ( field.type === "BIT" ) && ( field.length === 1 ) ) {
+             var bytes = field.buffer();
+            return( bytes[ 0 ] === 1 );
+         }
+        return( useDefaultTypeCasting() );
+    }
 };
 
 var connection;
@@ -100,6 +107,21 @@ app.get('/usersPublic', (req, res, next) => {
     catch(e){
       throw e;
     }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end()
+  })
+});
+
+app.delete('/user/:userId', (req, res, next) =>{
+  res.setHeader('Content-Type', 'application/json');
+  var promise = new Promise(function(resolve, reject){
+    let auctionId = req.params.auctionId;
+    auctionId = auctionId.replace("'", "''");
+    connection.query('DELETE FROM Users WHERE userId = {0}'.format(auctionId), function(err ,rows, field){
+      res.status(200).end('success');
+    });
   });
   promise.catch(function(error){
     res.status(400).send(error);
@@ -474,6 +496,7 @@ app.delete('/auction/:auctionId', (req, res, next) =>{
     return res.end()
   })
 });
+
 /*SPRINT 3 ROUTE*/
 //Post Bid given auctionId, userId, and price
 app.post('/bid', upload.array(), (req, res, next) => {
