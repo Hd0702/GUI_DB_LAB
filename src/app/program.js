@@ -501,15 +501,22 @@ promise.catch(function(error){
 })
 });
 
-app.get('/user', (req, res, next) => {
+app.get('/users/auctions', (req, res, next) => {
   res.setHeader('Content-Type', 'application/json');
   var promise = new Promise(function(resolve, reject) {
     try{
-        connection.query('SELECT firstName, lastName, username, datecreated, COUNT(auctionId) FROM Users U JOIN Auctions A ON A.userId = U.userId;', function(err, rows, fields){
+        connection.query('SELECT U.UserId, firstName, lastName, username, datecreated, COUNT(auctionId) AS carsListed, AVG(Rating) as averageRating, ProfilePicture FROM Users U LEFT JOIN Auctions A ON A.userId = U.userId LEFT JOIN Ratings R ON R.UserId= U.UserId Group By(U.UserId);', function(err, rows, fields){
+          console.log(rows);
           if(rows == null ||rows.length == 0){
             res.status(400).send('no rows returned');
           }
+          else {
+          rows.forEach(function(element) {
+            element['carsListed'] /= 2;
+          });
+        }
           res.end(JSON.stringify(rows));
+          
         });
     }
     catch(e){
@@ -591,12 +598,12 @@ app.get('/user/rating/:userId', (req, res, next) =>{
     try{
       let userId = req.params.userId;
       userId = userId.replace("'", "''");
-      connection.query('select u.UserId, u.FirstName, u.LastName, u.Address, u.Zip, u.Username, u.IsAdmin, u.DateCreated, u.ProfilePicture, u.City, u.State, COUNT(AuctionId), AVG(Rating) From Users u JOIN Auctions A ON A.UserId = u.UserId JOIN Ratings R ON R.UserId = u.UserId WHERE u.UserId = {0}'.format(userId), function(err, rows, fields){
+      connection.query('select u.UserId, u.FirstName, u.LastName, u.Address, u.Zip, u.Username, u.IsAdmin, u.DateCreated, u.ProfilePicture, u.City, u.State, COUNT(AuctionId) AS carsListed, AVG(Rating) AS averageRating From Users u LEFT JOIN Auctions A ON A.UserId = u.UserId LEFT JOIN Ratings R ON R.UserId = u.UserId WHERE u.UserId = {0}'.format(userId), function(err, rows, fields){
         if(rows == null || rows.length == 0){
           res.status(400).send('no rows returned');
         }
         else{
-          rows[0]['COUNT(AuctionId)'] /= 2;
+          rows[0]['cars_listed'] /= 2;
         }
         res.end(JSON.stringify(rows));
       });
@@ -608,6 +615,28 @@ app.get('/user/rating/:userId', (req, res, next) =>{
   promise.catch(function(error){
     res.status(400).send(error);
     return res.end();
+  });
+});
+
+app.get('/user/ratings/:userId', (req, res, next) => {
+  //this returns all the ratings entangled to a userId
+  res.setHeader('Content-Type', 'application/json');
+  var promise = new Promise(function(resolve, reject){
+    try{
+      let userId = req.params.userId;
+      userId = userId.replace("'", "''");
+      connection.query('SELECT R.UserId, RaterId, FirstName, LastName, Rating  FROM Ratings R JOIN Users U On R.RaterId = U.UserId WHERE R.UserId = {0}'.format(userId), function(err, rows, fields) {
+        if(rows == null || rows.length == 0){
+          res.status(400).send('no rows returned');
+        }
+        else{
+          res.end(JSON.stringify(rows));
+        }
+      });
+    }
+    catch(e){
+      throw e;
+    }
   });
 });
 //this function is a helper function for turning js dates into sql
