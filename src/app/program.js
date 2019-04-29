@@ -603,7 +603,7 @@ app.get('/user/rating/:userId', (req, res, next) =>{
           res.status(400).send('no rows returned');
         }
         else{
-          rows[0]['cars_listed'] /= 2;
+          rows[0]['carsListed'] /= 2;
         }
         res.end(JSON.stringify(rows));
       });
