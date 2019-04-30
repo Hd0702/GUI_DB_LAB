@@ -377,8 +377,12 @@ app.post('/auction', upload.array(), (req, res, next) => {
   let endTime = new Date(req.body['endTime']);
   let color = req.body['color'];
   let mileage = req.body['mileage'];
-  color = color.replace("'", "''");
-  mileage = mileage.replace("'", "''");
+  if(color != null){
+    color = color.replace("'", "''");
+  }
+  if(mileage != null){
+    mileage = mileage.replace("'", "''");
+  }
 
   /***** DEBUG ******
   dateCreated = new Date();
@@ -393,14 +397,32 @@ app.post('/auction', upload.array(), (req, res, next) => {
   let year = req.body['year'];
   let zip = req.body['zip'];
   let description = req.body['description'];
-  make = make.replace("'", "''");
-  model = model.replace("'", "''");
-  description = description.replace("'", "''");
+  if(make != null){
+    make = make.replace("'", "''");
+  }
+  else make = "";
+  if(model != null){
+    model = model.replace("'", "''");
+  }
+  else model = "";
+  if(description != null){
+    description = description.replace("'", "''");
+  }
+  else{
+    description = "";
+  }
+  if (zip == null) zip = null;
+  if(year == null) year = null;
+  if(mileage == null) mileage = null;
+  if(color != null){
+    color = color.replace("'", "''");
+  } 
+  else color = '';
   dateCreated = JsToSqlDateTime(dateCreated);
   endTime = JsToSqlDateTime(endTime);
   var promise = new Promise(function(resolve, reject){
     try{
-      connection.query('INSERT INTO Auctions (UserId, StartTime, EndTime, Price, Make, Model, Year, Zip, Description, Color, Mileage) VALUES({0}, "{1}", "{2}", {3},"{4}", "{5}", {6}, {7}, "{8}", "{9}", {10});'.format(userId, dateCreated, endTime, price, make, model, year, zip, description, color, mileage), function(err, result, fields){
+      connection.query('INSERT INTO Auctions (UserId, StartTime, EndTime, Price, Make, Model, Year, Zip, Description, Color, Mileage) VALUES('+userId + ', "'+dateCreated+'", "'+endTime+'", '+price+',"'+make+'", "'+model+'", '+year+', '+zip+', "'+description+'", "'+color+'", '+mileage+');', function(err, result, fields){
         res.end(JSON.stringify({ userId: userId, auctionId: result['insertId'], startTime: dateCreated, endTime: endTime, price: price, make: make, model: model, year: year, description: description, color: color, mileage: mileage   }));
       });
     }
