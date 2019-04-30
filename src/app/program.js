@@ -449,7 +449,7 @@ app.get('/auctions', (req, res, next) => {
     try{
       //DEUBG
       //console.log('SELECT A.UserId, AuctionId, StartTime, EndTime, Price, Make, Model, Year, A.Zip, Description, Username From Auctions A JOIN Users ON Users.UserId = A.UserId ORDER BY StartTime DESC;');
-      connection.query('SELECT A.UserId, AuctionId, StartTime, EndTime, Price, Make, Model, Year, A.Zip, Description, Username From Auctions A JOIN Users ON Users.UserId = A.UserId ORDER BY StartTime DESC;', function(err, rows, field) {
+      connection.query('SELECT A.UserId, AuctionId, StartTime, EndTime, Price, Make, Model, Year, A.Zip, Description, Username, Color From Auctions A JOIN Users ON Users.UserId = A.UserId ORDER BY StartTime DESC;', function(err, rows, field) {
 	      if(rows == null ||rows.length == 0){
           res.status(400).send('no rows returned');
         }
@@ -722,7 +722,6 @@ app.post('/rating', upload.array(), (req,res,next) =>{
       let userId = req.body['userId'];
       let raterId = req.body['raterId'];
       let description = req.body['description'];
-      console.log(description);
       let rating = req.body['rating'];
       if(description != null){
         description = description.replace("'", "''");
