@@ -691,7 +691,7 @@ app.get('/user/ratings/:userId', (req, res, next) => {
     try{
       let userId = req.params.userId;
       userId = userId.replace("'", "''");
-      connection.query('SELECT R.UserId, RaterId, FirstName, LastName, Rating  FROM Ratings R JOIN Users U On R.RaterId = U.UserId WHERE R.UserId = {0}'.format(userId), function(err, rows, fields) {
+      connection.query('SELECT R.UserId, RaterId, FirstName, LastName, Rating, Description  FROM Ratings R JOIN Users U On R.RaterId = U.UserId WHERE R.UserId = {0}'.format(userId), function(err, rows, fields) {
         if(rows == null || rows.length == 0){
           res.status(400).send('no rows returned');
         }
