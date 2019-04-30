@@ -683,6 +683,37 @@ app.get('/user/ratings/:userId', (req, res, next) => {
     }
   });
 });
+
+app.post('/rating', upload.array(), (req,res,next) =>{
+  //this route posts reviews
+  res.setHeader('Content-Type', 'application/json');
+  var promise = new Promise(function(resolve, reject){
+    try {
+      let userId = req.body['userId'];
+      let raterId = req.body['raterId'];
+      let description = req.body['description'];
+      console.log(description);
+      let rating = req.body['rating'];
+      if(description != null){
+        description = description.replace("'", "''");
+      }
+      else{
+        description ="";
+      }
+      console.log('INSERT INTO Ratings(UserId, RaterId, Description, Rating) VALUES({0},{1},"{2}",{3});'.format(userId, raterId,description, rating));
+      connection.query('INSERT INTO Ratings(UserId, RaterId, Description, Rating) VALUES({0},{1},"{2}",{3});'.format(userId, raterId,description, rating));
+      res.status(200).end();
+    }
+    catch(e){
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end();
+  });
+});
+
 //this function is a helper function for turning js dates into sql
 function twoDigits(d) {
   if(0 <= d && d < 10) return "0" + d.toString();
