@@ -495,7 +495,7 @@ app.get('/auction/:auctionId', (req,res,next) =>{
     try{
       let auctionId = req.params.auctionId;
       auctionId = auctionId.replace("'", "''");
-      connection.query('SELECT A.UserId, AuctionId, StartTime, EndTime, Price, Make, Model, Year, A.Zip, Description, Username From Auctions A  JOIN Users ON Users.UserId = A.UserId WHERE AuctionId = {0} ORDER BY StartTime DESC;'.format(auctionId), function(err, rows, field)  {
+      connection.query('SELECT A.UserId, AuctionId, StartTime, EndTime, Price, Make, Model, Year, A.Zip, Description, Color Username From Auctions A  JOIN Users ON Users.UserId = A.UserId WHERE AuctionId = {0} ORDER BY StartTime DESC;'.format(auctionId), function(err, rows, field)  {
         if(rows == null  ||rows.length == 0){
           res.status(400).send('no rows returned');
         }
