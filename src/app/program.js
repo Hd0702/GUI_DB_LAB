@@ -117,11 +117,15 @@ app.get('/usersPublic', (req, res, next) => {
 app.delete('/user/:userId', (req, res, next) =>{
   res.setHeader('Content-Type', 'application/json');
   var promise = new Promise(function(resolve, reject){
-    let auctionId = req.params.auctionId;
-    auctionId = auctionId.replace("'", "''");
-    connection.query('DELETE FROM Users WHERE userId = {0}'.format(auctionId), function(err ,rows, field){
-      res.status(200).end('success');
-    });
+    let userId = req.params.userId;
+    userId = userId.replace("'", "''");
+    //delete all releted items to a user
+    try{
+      connection.query('DELETE FROM Users Where UserId = '+userId+';');
+    }
+    catch(e){
+      return res.end();
+    }
   });
   promise.catch(function(error){
     res.status(400).send(error);
@@ -227,7 +231,6 @@ app.put('/user',upload.array(), (req, res, next) => {
   }
   if(req.body['zip'] != undefined &&req.body['zip'].length != 0){
     zip = req.body['zip'];
-    zip = zip.replace("'", "''");
     zip =  ' Zip = ' + zip;
   }
   if(req.body['state_code'] != undefined &&req.body['state_code'].length != 0){
@@ -396,6 +399,7 @@ app.post('/auction', upload.array(), (req, res, next) => {
   let model = req.body['model'];
   let year = req.body['year'];
   let zip = req.body['zip'];
+  let image = req.body['image'];
   let description = req.body['description'];
   if(make != null){
     make = make.replace("'", "''");
@@ -418,11 +422,14 @@ app.post('/auction', upload.array(), (req, res, next) => {
     color = color.replace("'", "''");
   } 
   else color = '';
+  if(image == null) image = "";
   dateCreated = JsToSqlDateTime(dateCreated);
   endTime = JsToSqlDateTime(endTime);
   var promise = new Promise(function(resolve, reject){
     try{
-      connection.query('INSERT INTO Auctions (UserId, StartTime, EndTime, Price, Make, Model, Year, Zip, Description, Color, Mileage) VALUES('+userId + ', "'+dateCreated+'", "'+endTime+'", '+price+',"'+make+'", "'+model+'", '+year+', '+zip+', "'+description+'", "'+color+'", '+mileage+');', function(err, result, fields){
+      //DEBUG
+      //console.log('INSERT INTO Auctions (UserId, StartTime, EndTime, Price, Make, Model, Year, Zip, Description, Color, Mileage, Image) VALUES('+userId + ', "'+dateCreated+'", "'+endTime+'", '+price+',"'+make+'", "'+model+'", '+year+', '+zip+', "'+description+'", "'+color+'", '+mileage+',"'+image+'");');
+      connection.query('INSERT INTO Auctions (UserId, StartTime, EndTime, Price, Make, Model, Year, Zip, Description, Color, Mileage, Image) VALUES('+userId + ', "'+dateCreated+'", "'+endTime+'", '+price+',"'+make+'", "'+model+'", '+year+', '+zip+', "'+description+'", "'+color+'", '+mileage+',"'+image+'");', function(err, result, fields){
         res.end(JSON.stringify({ userId: userId, auctionId: result['insertId'], startTime: dateCreated, endTime: endTime, price: price, make: make, model: model, year: year, description: description, color: color, mileage: mileage   }));
       });
     }
@@ -441,6 +448,8 @@ app.get('/auctions', (req, res, next) => {
   res.setHeader('Content-Type', 'application/json');
   var promise = new Promise(function(resolve, reject){
     try{
+      //DEUBG
+      //console.log('SELECT A.UserId, AuctionId, StartTime, EndTime, Price, Make, Model, Year, A.Zip, Description, Username From Auctions A JOIN Users ON Users.UserId = A.UserId ORDER BY StartTime DESC;');
       connection.query('SELECT A.UserId, AuctionId, StartTime, EndTime, Price, Make, Model, Year, A.Zip, Description, Username From Auctions A JOIN Users ON Users.UserId = A.UserId ORDER BY StartTime DESC;', function(err, rows, field) {
 	      if(rows == null ||rows.length == 0){
           res.status(400).send('no rows returned');
