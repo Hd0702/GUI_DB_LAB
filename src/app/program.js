@@ -118,7 +118,6 @@ app.delete('/user/:userId', (req, res, next) =>{
   res.setHeader('Content-Type', 'application/json');
   var promise = new Promise(function(resolve, reject){
     let userId = req.params.userId;
-    userId = userId.replace("'", "''");
     //delete all releted items to a user
     try{
       connection.query('DELETE FROM Users Where UserId = '+userId+';');
