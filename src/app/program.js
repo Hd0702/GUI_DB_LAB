@@ -541,7 +541,7 @@ app.post('/bid', upload.array(), (req, res, next) => {
     var dateTime = date+' '+time;
     try{
       connection.query('INSERT INTO Bids(UserId, AuctionId, Time, Price) VALUES ({0}, {1}, "{2}", {3});'.format(userId, auctionId, dateTime, price));
-      res.status(200).end('success');
+      res.status(200).end();
     }
     catch(e){
       throw e;
@@ -731,6 +731,24 @@ app.post('/rating', upload.array(), (req,res,next) =>{
       }
       console.log('INSERT INTO Ratings(UserId, RaterId, Description, Rating) VALUES({0},{1},"{2}",{3});'.format(userId, raterId,description, rating));
       connection.query('INSERT INTO Ratings(UserId, RaterId, Description, Rating) VALUES({0},{1},"{2}",{3});'.format(userId, raterId,description, rating));
+      res.status(200).end();
+    }
+    catch(e){
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end();
+  });
+});
+
+app.delete('/bid/:bidId', (req, res, next) =>{
+  res.setHeader('Content-Type', 'application/json');
+  var promise = new Promise(function(resolve, reject){
+    try{
+      let bidId = req.params.bidId;
+      connection.query('DELETE FROM Bids Where BidId = {0}'.format(bidId));
       res.status(200).end();
     }
     catch(e){
