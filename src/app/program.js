@@ -98,7 +98,7 @@ app.get('/usersPublic', (req, res, next) => {
   res.setHeader('Content-Type', 'application/json');
   var promise = new Promise(function(resolve, reject){
     try{
-      connection.query('Select UserId, FirstName, LastName, Zip, Username, DateCreated, ProfilePicture, 5 as CarsListed, 5 as AvgRating From Users;', function(err, rows, fields){
+      connection.query('Select U.UserId, FirstName, LastName, U.Zip, Username, DateCreated, ProfilePicture, COUNT(DISTINCT A.AuctionId) as CarsListed, AVG(R.Rating) as AvgRating FROM Users U LEFT JOIN Ratings R On U.UserId=R.userid LEFT JOIN Auctions A on U.UserId = A.UserId Group By U.UserId; ', function(err, rows, fields){
         console.log(rows);
         res.status(200).send(rows);
         res.end();
@@ -442,7 +442,7 @@ app.post('/auction', upload.array(), (req, res, next) => {
     return res.end()
   })
 });
-//add thing to also return the highest bid
+
 app.get('/auctions', (req, res, next) => {
   //this returns all auctions by most recent
   res.setHeader('Content-Type', 'application/json');
