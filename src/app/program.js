@@ -163,7 +163,7 @@ app.post('/register', upload.array(), (req, res, next) => {
         lastName = lastName.replace("'", "''");
         let picture = req.body['profilePicture'];
         let userId = "";
-        connection.query('INSERT INTO Users( Username, Password, DateCreated, FirstName, LastName, ProfilePicture) VALUES("' + user + '","' + ps.digest('hex')+'","' + dateTime +'","' + firstName + '","' + lastName + '","{0}");'.format(picture));
+        connection.query('INSERT INTO Users( Username, Password, DateCreated, FirstName, LastName, ProfilePicture) VALUES("' + user + '","' + ps.digest('hex')+'","' + dateTime +'","' + firstName + '","' + lastName + '","'+picture+'");');
         connection.query('SELECT userId, address, zip, ProfilePicture FROM Users WHERE Username = "' + user + '";',function(err, rows, fields){
         userId = rows[0]['userId'];
         res.end(JSON.stringify({ userId: userId, firstName: firstName, username: user, dateCreated: dateTime, lastName: lastName, address: '', zip: '', profilePicture: rows[0]['ProfilePicture']  }));
