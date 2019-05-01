@@ -297,7 +297,7 @@ app.post('/user/login', upload.array(),  (req, res, next) =>{
       console.log('select * From Users where Username = "'+username+'" AND Password="'+password+'";');
       connection.query('Select *, 1 as loginAuth From Users where Username = "'+username+'" AND Password="'+password+'";', function(err, rows, fields){
 	if(rows == null  ||rows.length == 0){
-	  res.end(JSON.stringify({ loginAuth: 0}));
+	        res.end(JSON.stringify({ loginAuth: 0}));
           return res.status(200);
         }
         console.log(rows[0]);
@@ -529,52 +529,6 @@ app.delete('/auction/:auctionId', (req, res, next) =>{
 });
 
 /*SPRINT 3 ROUTE*/
-//Post Bid given auctionId, userId, and price
-app.post('/bid', upload.array(), (req, res, next) => {
-  res.setHeader('Content-Type', 'application/json');
-  var promise = new Promise(function(resolve, reject) {
-    var today = new Date();
-    let userId = req.body['userId'];
-    let auctionId = req.body['auctionId'];
-    let price = req.body['price'];
-    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-    var dateTime = date+' '+time;
-    try{
-      connection.query('INSERT INTO Bids(UserId, AuctionId, Time, Price) VALUES ({0}, {1}, "{2}", {3});'.format(userId, auctionId, dateTime, price));
-      res.status(200).end();
-    }
-    catch(e){
-      throw e;
-    }
-  });
-  promise.catch(function(error){
-    res.status(400).send(error);
-  })
-});
-//add route to get bids via auction id, return highest by price
-//dont know if we need this but it sounds helpful lol
-app.get('/bid/:auctionId', (req, res, next) =>{
-res.setHeader('Content-Type', 'application/json');
-var promise = new Promise(function(resolve, reject) {
-  var auctionId = req.params.auctionId;
-  auctionId = auctionId.replace("'", "''");
-  try{
-    connection.query('SELECT * FROM Bids WHERE AuctionId = {0} ORDER BY Price DESC;'.format(auctionId), function(err, rows, fields){
-      if(rows == null  ||rows.length == 0){
-        res.status(400).send('no rows returned');
-      }
-      res.end(JSON.stringify(rows));
-    });
-  }
-  catch(e){
-    throw e;
-  }
-});
-promise.catch(function(error){
-  res.status(400).send(error);
-})
-});
 
 app.get('/users/auctions', (req, res, next) => {
   res.setHeader('Content-Type', 'application/json');
@@ -743,8 +697,32 @@ app.post('/rating', upload.array(), (req,res,next) =>{
     return res.end();
   });
 });
+//Post Bid given auctionId, userId, and price
+app.post('/bid', upload.array(), (req, res, next) => {
+  res.setHeader('Content-Type', 'application/json');
+  var promise = new Promise(function(resolve, reject) {
+    var today = new Date();
+    let userId = req.body['userId'];
+    let auctionId = req.body['auctionId'];
+    let price = req.body['price'];
+    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    var dateTime = date+' '+time;
+    try{
+      connection.query('INSERT INTO Bids(UserId, AuctionId, Time, Price) VALUES ({0}, {1}, "{2}", {3});'.format(userId, auctionId, dateTime, price));
+      res.status(200).end();
+    }
+    catch(e){
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+  })
+});
 
 app.delete('/bid/:bidId', (req, res, next) =>{
+  //delete a bid by bid id route
   res.setHeader('Content-Type', 'application/json');
   var promise = new Promise(function(resolve, reject){
     try{
@@ -761,7 +739,51 @@ app.delete('/bid/:bidId', (req, res, next) =>{
     return res.end();
   });
 });
+app.get('/bids/:userId', (req, res, next) =>{
+  res.setHeader('Content-Type', 'application/json');
+  var promise = new Promise(function(resolve, reject) {
+    var userId = req.params.userId;
+    try{
+      connection.query('SELECT B.UserId, BidId, B.AuctionId, Time, Price, FirstName, LastName, Username FROM Bids B Join Users U WHERE B.UserId = {0} ORDER BY Price DESC;'.format(userId), function(err, rows, fields){
+        if(rows == null  ||rows.length == 0){
+          res.status(400).send('no rows returned');
+        }
+        res.end(JSON.stringify(rows));
+      });
+    }
+    catch(e){
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+  })
+  });
+  
 
+//return bids for all auctions by highest bid
+app.get('/bids', (req,res,next)=>{
+  res.setHeader('Content-Type', 'application/json');
+  var promise = new Promise(function(resolve, reject){
+    try{
+      connection.query('SELECT * FROM Bids ORDER BY Price DESC;',function(err, rows, fields){
+        if(rows == null || rows.length == 0){
+          res.status(400).send('no rows returned');
+        }
+        else{
+          res.end(JSON.stringify(rows));
+        }
+      });
+    }
+    catch(e){
+      throw e;
+    }
+  });
+  promise.catch(function(error){
+    res.status(400).send(error);
+    return res.end();
+  });
+});
 //this function is a helper function for turning js dates into sql
 function twoDigits(d) {
   if(0 <= d && d < 10) return "0" + d.toString();
