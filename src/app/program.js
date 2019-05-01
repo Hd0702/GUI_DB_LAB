@@ -449,7 +449,7 @@ app.get('/auctions', (req, res, next) => {
     try{
       //DEUBG
       //console.log('SELECT A.UserId, AuctionId, StartTime, EndTime, Price, Make, Model, Year, A.Zip, Description, Username From Auctions A JOIN Users ON Users.UserId = A.UserId ORDER BY StartTime DESC;');
-      connection.query('SELECT A.UserId, A.AuctionId, B.AuctionId,Price, GROUP_CONCAT(test) as HighestBid, A.StartTime, A.EndTime, A.Mileage, A.Color, A.Make, A.Model, A.Zip, A.Year, A.Description, A.Image, Username FROM Auctions A JOIN Users ON Users.UserId = A.UserId LEFT JOIN (SELECT AuctionId, MAX(Price) as test FROM Bids GROUP BY AuctionId) B ON B.AuctionId = A.AuctionId GROUP BY A.AuctionId;', function(err, rows, field) {
+      connection.query('SELECT A.UserId, A.AuctionId as AuctionId ,Price, GROUP_CONCAT(test) as HighestBid, A.StartTime, A.EndTime, A.Mileage, A.Color, A.Make, A.Model, A.Zip, A.Year, A.Description, A.Image, Username FROM Auctions A JOIN Users ON Users.UserId = A.UserId LEFT JOIN (SELECT AuctionId, MAX(Price) as test FROM Bids GROUP BY AuctionId) B ON B.AuctionId = A.AuctionId GROUP BY A.AuctionId;', function(err, rows, field) {
 	      if(rows == null ||rows.length == 0){
           res.status(400).send('no rows returned');
         }
