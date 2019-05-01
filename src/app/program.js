@@ -450,7 +450,7 @@ app.get('/auctions', (req, res, next) => {
     try{
       //DEUBG
       //console.log('SELECT A.UserId, AuctionId, StartTime, EndTime, Price, Make, Model, Year, A.Zip, Description, Username From Auctions A JOIN Users ON Users.UserId = A.UserId ORDER BY StartTime DESC;');
-      connection.query('SELECT A.UserId, AuctionId, StartTime, EndTime, Price, Make, Model, Year, A.Zip, Description, Username, Color, Image From Auctions A JOIN Users ON Users.UserId = A.UserId ORDER BY StartTime DESC;', function(err, rows, field) {
+      connection.query('SELECT A.UserId, AuctionId, StartTime, EndTime, Price, Make, Model, Year, A.Zip, Description, Username, Color, Image, Mileage From Auctions A JOIN Users ON Users.UserId = A.UserId ORDER BY StartTime DESC;', function(err, rows, field) {
 	      if(rows == null ||rows.length == 0){
           res.status(400).send('no rows returned');
         }
@@ -496,7 +496,7 @@ app.get('/auction/:auctionId', (req,res,next) =>{
     try{
       let auctionId = req.params.auctionId;
       auctionId = auctionId.replace("'", "''");
-      connection.query('SELECT A.UserId, AuctionId, StartTime, EndTime, Price, Make, Model, Year, A.Zip, Description, Color, Username, Image From Auctions A  JOIN Users ON Users.UserId = A.UserId WHERE AuctionId = {0} ORDER BY StartTime DESC;'.format(auctionId), function(err, rows, field)  {
+      connection.query('SELECT A.UserId, AuctionId, StartTime, EndTime, Price, Make, Model, Year, A.Zip, Description, Color, Username, Image, Mileage From Auctions A  JOIN Users ON Users.UserId = A.UserId WHERE AuctionId = {0} ORDER BY StartTime DESC;'.format(auctionId), function(err, rows, field)  {
         if(rows == null  ||rows.length == 0){
           res.status(400).send('no rows returned');
         }
@@ -633,7 +633,7 @@ app.put('/auction/image', upload.array(), (req, res, next) => {
     try{
       let auctionId = req.body['auctionId'];
       let picture = req.body['image'];
-			connection.query('UPDATE Auctions SET Image = {0} WHERE AuctionId = {1};'.format(picture, auctionId));
+			connection.query('UPDATE Auctions SET Image = "'+picture+'" WHERE AuctionId = {0};'.format( auctionId));
       return res.status(200).end();
     }
     catch(e){
