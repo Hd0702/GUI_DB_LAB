@@ -744,7 +744,7 @@ app.get('/bids/:auctionid', (req, res, next) =>{
   var promise = new Promise(function(resolve, reject) {
     var auctionid = req.params.auctionid;
     try{
-      connection.query('SELECT B.UserId, BidId, B.AuctionId, Time, Price, Username, FirstName, LastName FROM Bids B Join Users U ON U.UserId = B.UserId WHERE B.AuctionId = 10 ORDER BY Price DESC;'.format(auctionid), function(err, rows, fields){
+      connection.query('SELECT B.UserId, BidId, B.AuctionId, Time, Price, Username, FirstName, LastName FROM Bids B Join Users U ON U.UserId = B.UserId WHERE B.AuctionId = {0} ORDER BY Price DESC;'.format(auctionid), function(err, rows, fields){
         if(rows == null  ||rows.length == 0){
           res.status(400).send('no rows returned');
         }
