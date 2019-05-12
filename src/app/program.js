@@ -85,7 +85,7 @@ app.get('/users', (req, res, next) => {
       });
     }
     catch(e){
-      throw e;
+      console.log(e);
     }
   });
   promise.catch(function(error){
@@ -105,7 +105,7 @@ app.get('/usersPublic', (req, res, next) => {
       });
     }
     catch(e){
-      throw e;
+      console.log(e);
     }
   });
   promise.catch(function(error){
@@ -123,7 +123,7 @@ app.delete('/user/:userId', (req, res, next) =>{
       connection.query('DELETE FROM Users Where UserId = '+userId+';');
     }
     catch(e){
-      return res.end();
+      console.log(e);
     }
   });
   promise.catch(function(error){
@@ -140,35 +140,43 @@ app.post('/register', upload.array(), (req, res, next) => {
     res.status(400).send(req.body);
     return res.end();
   }
-  user = user.replace("'", "''");
-  connection.query('select Username from Users where Username = "'+user +'";', function(err, rows, fields){
-    if(err) throw err;
-    if( rows.length !== 0){
-       res.status(400).send("Username Exists");
-       next();
-    }
-    else {
-      if(req.body['password'] == null) {
-        return res.status(400).send("password is blank");
-      }
-      const ps = crypto.createHash('sha256');
-      ps.update(req.body['password']);
-        var today = new Date();
-        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-        var dateTime = date+' '+time;
-        let firstName = req.body['firstName'];
-        firstName = firstName.replace("'", "''");
-        let lastName = req.body['lastName'];
-        lastName = lastName.replace("'", "''");
-        let userId = "";
-        connection.query('INSERT INTO Users( Username, Password, DateCreated, FirstName, LastName) VALUES("' + user + '","' + ps.digest('hex')+'","' + dateTime +'","' + firstName + '","' + lastName + '");');
-        connection.query('SELECT userId, address, zip, ProfilePicture FROM Users WHERE Username = "' + user + '";',function(err, rows, fields){
-        userId = rows[0]['userId'];
-        res.end(JSON.stringify({ userId: userId, firstName: firstName, username: user, dateCreated: dateTime, lastName: lastName, address: '', zip: '', profilePicture: rows[0]['ProfilePicture']  }));
-      });
-    }
-  })
+	try{
+		if (user == null || user == '') {
+	    res.status(400).send(req.body);
+	    return res.end();
+	  }
+		connection.query('select Username from Users where Username = "'+user +'";', function(err, rows, fields){
+	    if(err) throw err;
+	    if( rows.length !== 0){
+	       res.status(400).send("Username Exists");
+	       next();
+	    }
+	    else {
+	      if(req.body['password'] == null) {
+	        return res.status(400).send("password is blank");
+	      }
+	      const ps = crypto.createHash('sha256');
+	      ps.update(req.body['password']);
+	        var today = new Date();
+	        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+	        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+	        var dateTime = date+' '+time;
+	        let firstName = req.body['firstName'];
+	        firstName = firstName.replace("'", "''");
+	        let lastName = req.body['lastName'];
+	        lastName = lastName.replace("'", "''");
+	        let userId = "";
+	        connection.query('INSERT INTO Users( Username, Password, DateCreated, FirstName, LastName) VALUES("' + user + '","' + ps.digest('hex')+'","' + dateTime +'","' + firstName + '","' + lastName + '");');
+	        connection.query('SELECT userId, address, zip, ProfilePicture FROM Users WHERE Username = "' + user + '";',function(err, rows, fields){
+	        userId = rows[0]['userId'];
+	        res.end(JSON.stringify({ userId: userId, firstName: firstName, username: user, dateCreated: dateTime, lastName: lastName, address: '', zip: '', profilePicture: rows[0]['ProfilePicture']  }));
+	      });
+	    }
+	  })
+	}
+	catch(e){
+		console.log(e);
+	}
 });
 
 app.get('/checkuser/:username', (req, res, next) => {
@@ -190,9 +198,9 @@ app.get('/checkuser/:username', (req, res, next) => {
         }
       });
     }
-    catch(e){
-      throw e;
-    }
+		catch(e){
+			console.log(e);
+		}
   });
   promise.catch(function(error){
     res.status(400).send(error);
@@ -271,9 +279,9 @@ app.put('/user',upload.array(), (req, res, next) => {
       res.status(200);
       return res.end();
     }
-    catch(e) {
-      throw e;
-    }
+		catch(e){
+			console.log(e);
+		}
   });
   promise.catch(function(error){
     res.status(400).send(error);
@@ -305,9 +313,9 @@ app.post('/user/login', upload.array(),  (req, res, next) =>{
         res.end(JSON.stringify({ loginAuth: 1, userId: rows[0]['UserId'], firstName: rows[0]['FirstName'], username: rows[0]['Username'], dateCreated: rows[0]['DateCreated'], lastName: rows[0]['LastName'], address: rows[0]['Address'], zip: rows[0]['Zip'], isAdmin: rows[0]['IsAdmin'], profilePicture: rows[0]['ProfilePicture']  }));
       });
     }
-    catch(e){
-      throw e;
-    }
+		catch(e){
+			console.log(e);
+		}
   });
   promise.catch(function(error){
     res.status(400).send(error);
@@ -328,9 +336,9 @@ app.get('/user/:userId', (req,res,next) =>{
         res.end(JSON.stringify(rows[0]));
       });
     }
-    catch(e){
-      throw e;
-    }
+		catch(e){
+			console.log(e);
+		}
   });
   promise.catch(function(error){
     res.status(400).send(error);
@@ -353,9 +361,9 @@ app.put('/user/password', upload.array(), (req, res, next) => {
       connection.query('UPDATE Users SET Password = "' + password + '" WHERE Username = "'+username+'";');
       res.status(200).end();
     }
-    catch(e){
-      throw e;
-    }
+		catch(e){
+			console.log(e);
+		}
   });
   promise.catch(function(error){
     res.status(400).send(error);
@@ -419,7 +427,7 @@ app.post('/auction', upload.array(), (req, res, next) => {
   if(mileage == null) mileage = null;
   if(color != null){
     color = color.replace("'", "''");
-  } 
+  }
   else color = '';
   if(image == null) image = "";
   dateCreated = JsToSqlDateTime(dateCreated);
@@ -432,9 +440,9 @@ app.post('/auction', upload.array(), (req, res, next) => {
         res.end(JSON.stringify({ userId: userId, auctionId: result['insertId'], startTime: dateCreated, endTime: endTime, price: price, make: make, model: model, year: year, description: description, color: color, mileage: mileage   }));
       });
     }
-    catch(e){
-      throw e;
-    }
+		catch(e){
+			console.log(e);
+		}
   });
   promise.catch(function(error){
     res.status(400).send(error);
@@ -456,9 +464,9 @@ app.get('/auctions', (req, res, next) => {
         res.end(JSON.stringify(rows));
       });
     }
-    catch(e) {
-      throw e;
-    }
+		catch(e){
+			console.log(e);
+		}
   });
   promise.catch(function(error){
     res.status(400).send(error);
@@ -479,9 +487,9 @@ app.get('/auctions/user/:userId', (req,res,next) =>{
         res.end(JSON.stringify(rows));
       });
     }
-    catch(e){
-      throw e;
-    }
+		catch(e){
+			console.log(e);
+		}
   });
   promise.catch(function(error){
     res.status(400).send(error);
@@ -502,9 +510,9 @@ app.get('/auction/:auctionId', (req,res,next) =>{
         res.end(JSON.stringify(rows));
       });
     }
-    catch(e){
-      throw e;
-    }
+		catch(e){
+			console.log(e);
+		}
   });
   promise.catch(function(error){
     res.status(400).send(error);
@@ -547,9 +555,9 @@ app.get('/users/auctions', (req, res, next) => {
 
         });
     }
-    catch(e){
-      throw e;
-    }
+		catch(e){
+			console.log(e);
+		}
   });
   promise.catch(function(error){
     res.status(400).send(error);
@@ -568,9 +576,9 @@ app.put('/user/image', upload.array(), (req, res, next) => {
       connection.query('UPDATE Users SET ProfilePicture = "'+ picture +'" WHERE UserId = {0};'.format(userId));
       return res.status(200).end();
     }
-    catch(e) {
-      throw e;
-    }
+		catch(e){
+			console.log(e);
+		}
   });
   promise.catch(function(error){
 		console.log(error);
@@ -589,9 +597,9 @@ app.put('/auction/image', upload.array(), (req, res, next) => {
 			connection.query('UPDATE Auctions SET Image = "'+picture+'" WHERE AuctionId = {0};'.format( auctionId));
       return res.status(200).end();
     }
-    catch(e){
-      throw e;
-    }
+		catch(e){
+			console.log(e);
+		}
   });
   promise.catch(function(error){
     res.status(400).send(error);
@@ -609,9 +617,9 @@ app.put('/user/admin/:userId', (req,res, next) =>{
       connection.query('UPDATE Users SET IsAdmin = IsAdmin ^ 1 Where UserId= {0};'.format(userId));
       res.status(200).end();
     }
-    catch(e){
-      throw e;
-    }
+		catch(e){
+			console.log(e);
+		}
   });
   promise.catch(function(error){
     res.status(400).send(error);
@@ -636,9 +644,9 @@ app.get('/user/rating/:userId', (req, res, next) =>{
         res.end(JSON.stringify(rows));
       });
     }
-    catch(e){
-      throw e;
-    }
+		catch(e){
+			console.log(e);
+		}
   });
   promise.catch(function(error){
     res.status(400).send(error);
@@ -662,9 +670,9 @@ app.get('/user/ratings/:userId', (req, res, next) => {
         }
       });
     }
-    catch(e){
-      throw e;
-    }
+		catch(e){
+			console.log(e);
+		}
   });
 });
 
@@ -687,9 +695,9 @@ app.post('/rating', upload.array(), (req,res,next) =>{
       connection.query('INSERT INTO Ratings(UserId, RaterId, Description, Rating) VALUES({0},{1},"{2}",{3});'.format(userId, raterId,description, rating));
       res.status(200).end();
     }
-    catch(e){
-      throw e;
-    }
+		catch(e){
+			console.log(e);
+		}
   });
   promise.catch(function(error){
     res.status(400).send(error);
@@ -711,9 +719,9 @@ app.post('/bid', upload.array(), (req, res, next) => {
       connection.query('INSERT INTO Bids(UserId, AuctionId, Time, Price) VALUES ({0}, {1}, "{2}", {3});'.format(userId, auctionId, dateTime, price));
       res.status(200).end();
     }
-    catch(e){
-      throw e;
-    }
+		catch(e){
+			console.log(e);
+		}
   });
   promise.catch(function(error){
     res.status(400).send(error);
@@ -729,9 +737,9 @@ app.delete('/bid/:bidId', (req, res, next) =>{
       connection.query('DELETE FROM Bids Where BidId = {0}'.format(bidId));
       res.status(200).end();
     }
-    catch(e){
-      throw e;
-    }
+		catch(e){
+			console.log(e);
+		}
   });
   promise.catch(function(error){
     res.status(400).send(error);
@@ -752,9 +760,9 @@ app.get('/bids/:auctionid', (req, res, next) =>{
         res.end(JSON.stringify(rows));
       });
     }
-    catch(e){
-      throw e;
-    }
+		catch(e){
+			console.log(e);
+		}
   });
   promise.catch(function(error){
     res.status(400).send(error);
@@ -776,13 +784,13 @@ app.get('/bids/:auctionid', (req, res, next) =>{
           }
         });
       }
-      catch(e){
-        throw e;
-      }
+			catch(e){
+				console.log(e);
+			}
     });
 });
 
-  
+
 //this function is a helper function for turning js dates into sql
 function twoDigits(d) {
   if(0 <= d && d < 10) return "0" + d.toString();
