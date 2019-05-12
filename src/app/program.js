@@ -79,7 +79,6 @@ app.get('/users', (req, res, next) => {
   var promise = new Promise(function(resolve, reject){
     try{
       connection.query('Select UserId, FirstName, LastName, Address, Zip, Username, IsAdmin, DateCreated, ProfilePicture, City, State From Users;', function(err, rows, fields){
-        console.log(rows);
         res.status(200).send(rows);
         res.end();
       });
@@ -99,7 +98,6 @@ app.get('/usersPublic', (req, res, next) => {
   var promise = new Promise(function(resolve, reject){
     try{
       connection.query('Select U.UserId, FirstName, LastName, U.Zip, Username, DateCreated, ProfilePicture, COUNT(DISTINCT A.AuctionId) as CarsListed, AVG(R.Rating) as AvgRating FROM Users U LEFT JOIN Ratings R On U.UserId=R.userid LEFT JOIN Auctions A on U.UserId = A.UserId Group By U.UserId; ', function(err, rows, fields){
-        console.log(rows);
         res.status(200).send(rows);
         res.end();
       });
@@ -219,7 +217,6 @@ app.put('/user',upload.array(), (req, res, next) => {
   let zip = '';
   let city = '';
   let state = '';
-	console.log(req.body)
   if(req.body['firstName'] != undefined &&req.body['firstName'].length != 0) {
     let firstName = req.body['firstName'];
     firstName = firstName.replace("'", "''");
@@ -301,14 +298,11 @@ app.post('/user/login', upload.array(),  (req, res, next) =>{
   let password = ps.digest('hex');
   var promise = new Promise(function(resolve, reject) {
     try {
-      console.log('select * From Users where Username = "'+username+'" AND Password="'+password+'";');
       connection.query('Select *, 1 as loginAuth From Users where Username = "'+username+'" AND Password="'+password+'";', function(err, rows, fields){
 	if(rows == null  ||rows.length == 0){
 	        res.end(JSON.stringify({ loginAuth: 0}));
           return res.status(200);
         }
-        console.log(rows[0]);
-        console.log(rows);
 	let result = rows[0];
         res.end(JSON.stringify({ loginAuth: 1, userId: rows[0]['UserId'], firstName: rows[0]['FirstName'], username: rows[0]['Username'], dateCreated: rows[0]['DateCreated'], lastName: rows[0]['LastName'], address: rows[0]['Address'], zip: rows[0]['Zip'], isAdmin: rows[0]['IsAdmin'], profilePicture: rows[0]['ProfilePicture']  }));
       });
@@ -542,7 +536,6 @@ app.get('/users/auctions', (req, res, next) => {
   var promise = new Promise(function(resolve, reject) {
     try{
         connection.query('SELECT U.UserId, firstName, lastName, username, datecreated, COUNT(auctionId) AS carsListed, AVG(Rating) as averageRating, ProfilePicture FROM Users U LEFT JOIN Auctions A ON A.userId = U.userId LEFT JOIN Ratings R ON R.UserId= U.UserId Group By(U.UserId);', function(err, rows, fields){
-          console.log(rows);
           if(rows == null ||rows.length == 0){
             res.status(400).send('no rows returned');
           }
@@ -570,7 +563,6 @@ app.put('/user/image', upload.array(), (req, res, next) => {
   //this route adds a profile image by userId
   var promise = new Promise(function(resolve, reject){
     try{
-      console.log(req.body);
       let userId = req.body['userId'];
       let picture = req.body['profilePicture'].toString();
       connection.query('UPDATE Users SET ProfilePicture = "'+ picture +'" WHERE UserId = {0};'.format(userId));
@@ -752,7 +744,6 @@ app.get('/bids/:auctionid', (req, res, next) =>{
   var promise = new Promise(function(resolve, reject) {
     var auctionid = req.params.auctionid;
     try{
-      console.log('')
       connection.query('SELECT B.UserId, BidId, B.AuctionId, Time, Price, Username, FirstName, LastName FROM Bids B Join Users U ON U.UserId = B.UserId WHERE B.AuctionId = 10 ORDER BY Price DESC;'.format(auctionid), function(err, rows, fields){
         if(rows == null  ||rows.length == 0){
           res.status(400).send('no rows returned');
